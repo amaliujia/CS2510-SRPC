@@ -5,7 +5,7 @@
 3- if error occures.  
 4- if an old ack arrives.  
 5-no mapper from the beggining for client and server.  
-6- do the report:  
+6- do the report:
   - things aren't working.  
   - setup tests.  
   - update the description of the state in the server side and what it means.  
