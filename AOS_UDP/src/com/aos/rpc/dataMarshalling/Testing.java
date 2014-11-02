@@ -2,8 +2,6 @@ package com.aos.rpc.dataMarshalling;
 
 import java.util.Scanner;
 
-import com.aos.rpc.server.MatrixResolver;
-
 public class Testing {
 
 	public static void main(String[] args) throws Exception
