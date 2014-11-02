@@ -15,14 +15,6 @@ public class portMapper
 
 	}
 
-//    public static void main (String[] args) throws IOException, InterruptedException {
-//        mapperTable table = new mapperTable ();
-//        portMapperRuntime runtime;
-//        runtime = new portMapperRuntime(table);
-//        runtime.run();
-//
-//    }
-
 
 	public void run ()
             throws InterruptedException
