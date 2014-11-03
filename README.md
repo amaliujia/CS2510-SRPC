@@ -7,7 +7,8 @@
 5- no mapper from the beggining for client and server.  
 6- fix the portmaper path.  
 7- rename to unmarshal.  
-8- do the report:
+8- negotiate the state table key.  
+9- do the report:
   * things aren't working.  
   * setup tests.  
   * update the description of the state in the server side and what it means.  
