@@ -24,8 +24,8 @@ public class ClientRPCRuntime
 	private int mapperPort;
 	private String mapperIPString;
 
-    private int serverUDPPort;
-	
+	private int serverUDPPort;
+
 	public ClientRPCRuntime(String path) throws Exception
 	{
 		fillMapperIp(path);
@@ -50,55 +50,61 @@ public class ClientRPCRuntime
 	}
 
 
-    public UDPDemarshaller[] dataToServer (UDPMarshaller[] udpMarshallers, int elementsToReceive, long tranID)
-            throws IOException
-    {
-    	System.out.println();
-    	UDPClientStreamHandler udpClientStreamHandler = new UDPClientStreamHandler(serverUDPPort, serverIPString, udpMarshallers, elementsToReceive, tranID);
-    	udpClientStreamHandler.sendUdpParametersPackets();
-        SimpleDateFormat ft = 
-        new SimpleDateFormat ("E yyyy.MM.dd 'at' hh:mm:ss a zzz");
-        System.out.println("Current Date: " + ft.format(new Date( )));    	
-        udpClientStreamHandler.recieveUdpResultsPackets();
-        System.out.println("Current Date: " + ft.format(new Date( )));    	
-        return  udpClientStreamHandler.getRecievedResultPackets();
+	public UDPDemarshaller[] dataToServer (UDPMarshaller[] udpMarshallers, int elementsToReceive, long tranID)
+			throws IOException
+	{
+		if (serverIPString != "0.0.0.0")
+		{
+			UDPClientStreamHandler udpClientStreamHandler = new UDPClientStreamHandler(serverUDPPort, serverIPString, udpMarshallers, elementsToReceive, tranID);
+			udpClientStreamHandler.sendUdpParametersPackets();
+			udpClientStreamHandler.recieveUdpResultsPackets();
+			return  udpClientStreamHandler.getRecievedResultPackets();
+		}
+		else 
+		{
+			return null;
+		}
 
-    }
+	}
 
 	public void requestMethodToServer (ClientStub clientStub, byte[] requestToServer) throws UnknownHostException, IOException
 	{
-		try {
-            System.out.println("Connecting to Server on its port " + serverTCPPort);
+		if (serverIPString != "0.0.0.0")	
+		{
+			try 
+			{
+				System.out.println("Connecting to Server on its port " + serverTCPPort);
 
-            Socket client = new Socket(serverIPString, serverTCPPort);
-            System.out.println("Just connected to " + client.getRemoteSocketAddress());
-
-
-            //-------------------------------------------------
-            //send to the Server
-            //-------------------------------------------------
-            DataOutputStream out = new DataOutputStream(client.getOutputStream());
-
-            out.writeInt(requestToServer.length);
-            out.write(requestToServer);
-            out.flush();
+				Socket client = new Socket(serverIPString, serverTCPPort);
+				System.out.println("Just connected to " + client.getRemoteSocketAddress());
 
 
-            //-------------------------------------------------
-            //receive from the Server
-            //-------------------------------------------------
-            DataInputStream in = new DataInputStream(client.getInputStream());
+				//-------------------------------------------------
+				//send to the Server
+				//-------------------------------------------------
+				DataOutputStream out = new DataOutputStream(client.getOutputStream());
 
-            serverUDPPort = in.readInt();
-            System.out.println("port is:" + serverUDPPort);
-            client.close();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-            System.out.println("Errors detected when communicating to the server using TCP!!!");
-        }
-    }
+				out.writeInt(requestToServer.length);
+				out.write(requestToServer);
+				out.flush();
+
+
+				//-------------------------------------------------
+				//receive from the Server
+				//-------------------------------------------------
+				DataInputStream in = new DataInputStream(client.getInputStream());
+
+				serverUDPPort = in.readInt();
+				System.out.println("Port is: " + serverUDPPort);
+				client.close();
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+				System.out.println("Error: (In Client Side) TCP Communication lost to the server");
+			}
+		}
+	}
 
 	// check the port Mapper for the relative IP and port number
 	public void requestMethodToPortMapper (byte[] requestToPortMapper)
@@ -108,51 +114,67 @@ public class ClientRPCRuntime
 			System.out.println("Connecting to PortMapper on its port " + mapperPort);
 			Socket client = new Socket(mapperIPString, mapperPort);
 			System.out.println("Just connected to "+ client.getRemoteSocketAddress());
-       
+
 			//preparing the channel to send request
 			DataOutputStream out = new DataOutputStream(client.getOutputStream());
-              
+
 			//sending the request message in channel
 			out.writeInt(requestToPortMapper.length);
-//			out.writeUTF("Hello!");
+			//			out.writeUTF("Hello!");
 			out.write(requestToPortMapper);
 			//actual sending
 			out.flush();
-       
+
 
 			//preparing the channel to receive the reply
 			DataInputStream in = new DataInputStream(client.getInputStream());
-       
+
 			//getting the reply message (blocking for reply)
 			int replySize = in.readInt();
 			byte[] response = new byte[replySize];
 			for (int i = 0; i < replySize; i++)
 				response[i] = (byte) in.read();
 			demarshalReplyFromPortMapper (response);
-            client.close();
+			client.close();
 		}
 		catch(IOException e)
 		{
 			e.printStackTrace();
-            System.out.println("Errors detected when communicating to the port mapper!!!");
+			System.out.println("Error: (In Client Side) Communication lost to the port mapper");
+			serverIPString = "0.0.0.0";
+			serverTCPPort = 0;
 		}
 	}
-	
+
 	private void demarshalReplyFromPortMapper (byte[] response)
 	{
 		TCPMapperReplyDemarshaller replyDemarshaller = new TCPMapperReplyDemarshaller();
-        replyDemarshaller.setStream(response);
-        int ip1 = replyDemarshaller.getIp1();
-        int ip2 = replyDemarshaller.getIp2();
-        int ip3 = replyDemarshaller.getIp3();
-        int ip4 = replyDemarshaller.getIp4();
-        
-        serverIPString = ip1 + "." +ip2 + "." + ip3 + "." + ip4 ;
-        serverTCPPort = replyDemarshaller.getPort();
+		replyDemarshaller.setStream(response);
+		if (replyDemarshaller.getType() == 2) 
+		{
+			int ip1 = replyDemarshaller.getIp1();
+			int ip2 = replyDemarshaller.getIp2();
+			int ip3 = replyDemarshaller.getIp3();
+			int ip4 = replyDemarshaller.getIp4();
 
-        System.out.println("The corresponding IP and port acquired from the PortMapper is   " + serverIPString + ":" +serverTCPPort);
-        
+			serverIPString = ip1 + "." +ip2 + "." + ip3 + "." + ip4 ;
+			serverTCPPort = replyDemarshaller.getPort();
 
+			System.out.println("The corresponding IP and port acquired from the PortMapper is   " + serverIPString + ":" +serverTCPPort);
+		}
+		else if (replyDemarshaller.getType() == 0)
+		{
+			System.out.println("Error: (In Client Side) PortMapper being busy");
+			serverIPString = "0.0.0.0";
+			serverTCPPort = 0;
+		}
+		else 
+		{
+			System.out.println("Error: (In Client Side) Wrong message format from PortMapper");
+			serverIPString = "0.0.0.0";
+			serverTCPPort = 0;
+
+		}
 	}
-	
+
 }

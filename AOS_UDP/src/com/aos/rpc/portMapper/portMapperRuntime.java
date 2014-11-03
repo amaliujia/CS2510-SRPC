@@ -97,6 +97,7 @@ public class portMapperRuntime
 				else
 				{
 
+					System.out.println("Error: PortMapper busy");
                     DataOutputStream out = new DataOutputStream(tcpConnection.getOutputStream());
 
 

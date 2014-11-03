@@ -2,6 +2,7 @@ package com.aos.rpc.portMapper;
 
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 
 public class portMapper 
 { 
@@ -17,7 +18,7 @@ public class portMapper
 
 
 	public void run ()
-            throws InterruptedException
+            throws InterruptedException, SocketTimeoutException
 	{
 				runtime.run ();
 	}
