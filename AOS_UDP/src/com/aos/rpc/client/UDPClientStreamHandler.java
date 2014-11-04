@@ -71,6 +71,8 @@ public class UDPClientStreamHandler {
 
         while ((attempts < 3) && ((neededPacket - 1) < numberOfPacketsToReceive))
         {
+        	flag = true;
+        	
             for (int i = 0; i < burstSize && flag && (neededPacket <= numberOfPacketsToReceive); i++)
             {
                 try
