@@ -56,8 +56,6 @@ public class ServerStub extends Thread
 		stateKey = "";
 	}
 
-
-
 	private void processNewClientRequest() throws Exception
 	{
 		MatrixResolver matRes = new MatrixResolver();
@@ -77,6 +75,7 @@ public class ServerStub extends Thread
 			result = new double[1];
 			//call the procedure
 			result[0] = program.min(desegmentation.getVector1());
+			printoutProcessingEnd(1);
 			//form the reply 
 			segmentation = new ServerSegmentation(result, null, clientTcpDemarshaller.getTransactionID());
 			//fill the result structure for the status
@@ -91,6 +90,7 @@ public class ServerStub extends Thread
 			result = new double[1];
 			//call the procedure
 			result[0] = program.max(desegmentation.getVector1());
+			printoutProcessingEnd(2);
 			//form the reply 
 			segmentation = new ServerSegmentation(result, null, clientTcpDemarshaller.getTransactionID());
 			//fill the result structure for the status
@@ -105,6 +105,7 @@ public class ServerStub extends Thread
 			result = new double[desegmentation.getVector1().length];
 			//call the procedure
 			result = program.sort(desegmentation.getVector1());
+			printoutProcessingEnd(3);
 			//form the reply 
 			segmentation = new ServerSegmentation(result, null, clientTcpDemarshaller.getTransactionID());
 			//fill the result structure for the status
@@ -125,6 +126,7 @@ public class ServerStub extends Thread
 				throw new Exception("the dimensions doesn't match");
 			//now call the procedure
 			double[][] matResult = program.multiply(mat1, mat2);
+			printoutProcessingEnd(4);
 			matRes.setMatrix(matResult);
 			//get the vector from the result matrix
 			result = matRes.getVectorFromMatrix();
@@ -148,8 +150,9 @@ public class ServerStub extends Thread
 	private void handleClientRequest() throws Exception
 	{
 		desegmentRequest();
-		constructStateKey();		
+		constructStateKey();	
 
+//		printoutRequestRecieved();
 		if(doesRequestHasState())
 		{
 			if(resultExists())
@@ -298,7 +301,7 @@ public class ServerStub extends Thread
 			if(clientTcpDemarshaller != null)
 			{
 				//push the communication handling to this module and further handle it
-				udpHandler = new UDPServerStreamHandler(socket, stateKeeper);
+				udpHandler = new UDPServerStreamHandler(socket);
 				clientRequestRecieved();
 
 				//if the response has no errors, update state table by stating that the request is fully served
@@ -380,7 +383,8 @@ public class ServerStub extends Thread
 		if(temp != null)
 			result = true;
 
-		return result;	}
+		return result;	
+	}
 
 	//checks in the status table if the request is recieved
 	private boolean resultExists()
@@ -477,14 +481,51 @@ public class ServerStub extends Thread
 	}
 
 
-//reconstruct the parameters to their original form of a one dimentional vector(s)
-private void desegmentRequest()
-{
-	desegmentation.setDemarshallers(udpHandler.getRecievedParametersPackets());
-	desegmentation.setNumberOfElements1_r(clientTcpDemarshaller.getNumberOfElements1_r());
-	desegmentation.setNumberOfElements1_c(clientTcpDemarshaller.getNumberOfElements1_c());
-	desegmentation.setNumberOfElements2_r(clientTcpDemarshaller.getNumberOfElements2_r());
-	desegmentation.setNumberOfElements2_c(clientTcpDemarshaller.getNumberOfElements2_c());
-	desegmentation.constructParameters();
-}
+	//reconstruct the parameters to their original form of a one dimentional vector(s)
+	private void desegmentRequest()
+	{
+		desegmentation.setDemarshallers(udpHandler.getRecievedParametersPackets());
+		desegmentation.setNumberOfElements1_r(clientTcpDemarshaller.getNumberOfElements1_r());
+		desegmentation.setNumberOfElements1_c(clientTcpDemarshaller.getNumberOfElements1_c());
+		desegmentation.setNumberOfElements2_r(clientTcpDemarshaller.getNumberOfElements2_r());
+		desegmentation.setNumberOfElements2_c(clientTcpDemarshaller.getNumberOfElements2_c());
+		desegmentation.constructParameters();
+	}
+	
+	//print out for the reception of the request
+//	private void printoutRequestRecieved()
+//	{
+//		System.out.println("=====================================");
+//		System.out.println("Request recieved from: " + udpHandler.getClientAddress() + " with Transaction ID: " + clientTcpDemarshaller.getTransactionID());
+//		System.out.println("=====================================");
+//
+//	}
+	
+	
+	//print out of the end of processing
+	private void printoutProcessingEnd(int procNum)
+	{
+		switch(procNum)
+		{
+		case 1:
+			System.out.println("- Done processing min() for: " + udpHandler.getClientAddress() +
+					" with Transaction ID: " + clientTcpDemarshaller.getTransactionID());
+			break;
+		case 2:
+			System.out.println("- Done processing max() for: " + udpHandler.getClientAddress() +
+					" with Transaction ID: " + clientTcpDemarshaller.getTransactionID());
+			break;
+		case 3:
+			System.out.println("- Done processing sort() for: " + udpHandler.getClientAddress() +
+					" with Transaction ID: " + clientTcpDemarshaller.getTransactionID());
+			break;
+		case 4:
+			System.out.println("- Done processing multiply() for: " + udpHandler.getClientAddress() +
+					" with Transaction ID: " + clientTcpDemarshaller.getTransactionID());
+			break;
+			default:
+				break;
+		}	}
+
+
 }

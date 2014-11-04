@@ -1,9 +1,5 @@
 package com.aos.rpc.client;
 
-import java.io.IOException;
-import java.net.UnknownHostException;
-import java.util.Random;
-
 
 
 public class Testing 
@@ -11,8 +7,8 @@ public class Testing
 	public static void main (String[] args) throws Exception
 	{
 		double[] onedim = new double[10];
-		double[][] twodim1 = new double[1000][1200];
-		double[][] twodim2 = new double[1200][1000];
+		double[][] twodim1 = new double[10][1200];
+		double[][] twodim2 = new double[1200][10];
 		
 		//double[][] twodim1 = new double[2][3];
 		//double[][] twodim2 = new double[3][2];
@@ -31,7 +27,7 @@ public class Testing
 				twodim2[i][j] = Math.random() * 100;
 
 		
-		ClientInterface cInterface = new ClientInterface("address");
+		ClientInterface cInterface = new ClientInterface();
 		
 		System.out.println("\n\n------------------------------------------------------------------------------");
 		System.out.println("------------------------------------------------------------------------------");
@@ -61,7 +57,7 @@ public class Testing
 		}
 		else 
 		{
-			System.out.println("The min is ... \n" + ans2);
+			System.out.println("The min is ... \n" + String.format("%.2f", ans2));
 		}
         
 		
@@ -72,7 +68,6 @@ public class Testing
 		
 		System.out.println("We are going to get the max from the array of ...");
 		printOnedim(onedim);
-		System.out.println("The max is ... \n" + cInterface.max(onedim));
         double ans3 = cInterface.max(onedim);
 		if (ans3 == -1)
 		{
@@ -80,7 +75,7 @@ public class Testing
 		}
 		else 
 		{
-			System.out.println("The max is ... \n" + ans3);
+			System.out.println("The max is ... \n" + String.format("%.2f", ans3));
 		}
 		
 		
@@ -101,7 +96,8 @@ public class Testing
 		}
 		else 
 		{
-		    printTwodim(ans4);
+		    //printTwodim(ans4);
+			System.out.println("Mult done!");
 		}
 
 		

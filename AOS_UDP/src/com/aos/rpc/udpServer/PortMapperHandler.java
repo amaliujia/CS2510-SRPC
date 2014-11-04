@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.file.Path;
 
 import com.aos.rpc.dataMarshalling.TCPMapperReplyDemarshaller;
 import com.aos.rpc.dataMarshalling.TCPMapperRequestMarshaller;
@@ -38,14 +39,14 @@ public class PortMapperHandler
 		demarshal = new TCPMapperReplyDemarshaller();
 		ip = new int[4];
 		port = serverPort;
+		portMapperPath = mapperPath;
 		fillServerIp(serverIp);
-		fillMapperIp(mapperPath);
 	}
 
-	private void fillMapperIp(String path) throws Exception
+	private void fillMapperIp() throws Exception
 	{
 		String line = "";
-		File file = new File(path);
+		File file = new File(portMapperPath);
 		//change it to the afs path
 		// if file doesnt exists, then create it
 		if (!file.exists())
@@ -54,6 +55,8 @@ public class PortMapperHandler
 		BufferedReader br = new BufferedReader(fr);
 		line = br.readLine();
 		br.close();
+		if(line == null)
+			throw new Exception("file is empty problem");
 		String[] ipandport = line.split(" ");
 		mapperIp = ipandport[0];
 		mapperPort = Integer.valueOf(ipandport[1]);
@@ -91,8 +94,10 @@ public class PortMapperHandler
 			mapper.close();
 	}
 
-	public boolean registerAtPortMapper() throws IOException
+	public boolean registerAtPortMapper() throws Exception
 	{
+		fillMapperIp();
+
 		boolean result = true;
 
 		int[] procedureNumbers = program.getProcedureNumbers();

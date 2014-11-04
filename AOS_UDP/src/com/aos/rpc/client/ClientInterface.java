@@ -10,9 +10,10 @@ public class ClientInterface
 {
 	private ClientStub newCS;
 	private long counter = 0;
-	public  ClientInterface (String path) throws Exception
+	public  ClientInterface () throws Exception
 	{
-		newCS = new ClientStub(path);
+		newCS = new ClientStub();
+		
 	}
 
 	public double[] sort (double[] original) throws UnknownHostException, IOException

@@ -30,7 +30,7 @@ public class PortMapperWorker extends Thread
 			DataInputStream in = new DataInputStream(socket.getInputStream());
 			DataOutputStream out = new DataOutputStream (socket.getOutputStream());
 			
-			System.out.println("I'm reading the stream now");
+			//System.out.println("I'm reading the stream now");
 			int requestSize = in.readInt();
 			byte[] request = new byte[requestSize];
 			for (int i = 0; i < requestSize; i++)
@@ -45,7 +45,6 @@ public class PortMapperWorker extends Thread
 
                 if (requestDemarshaller.getRequestType() == 0)
                 {
-        			System.out.println("I'm registering the proc now");
 
                     int ip1 = requestDemarshaller.getIp1();
                     int ip2 = requestDemarshaller.getIp2();
@@ -58,7 +57,9 @@ public class PortMapperWorker extends Thread
                     String ipString = ip1 + "." + ip2 + "." + ip3 + "." + ip4;
                     String procedure = prog + "," + progV + "," + proc;
                     IPAndPort ipp = new IPAndPort(InetAddress.getByName(ipString), port);
+        			System.out.println("- Server " + ipString + " is registering the procedure: " + proc);
 
+                    
                     table.register(procedure, ipp);
 
 
@@ -106,7 +107,7 @@ public class PortMapperWorker extends Thread
                     {
                         replyMarshaller.setIPsWithPort(0, 0, 0, 0, 0);
                     }
-                    System.out.println(replyMarshaller.formStream()); 
+                    replyMarshaller.formStream(); 
                     byte[] reply = replyMarshaller.getStream();
                     
 //                    System.out.println(reply);

@@ -50,7 +50,7 @@ public class mapperTable
 		if (portTable.containsKey(proc) && counters.containsKey(proc))
 		{
 			int index = (counters.get(proc) + 1) % portTable.get(proc).size();
-			System.out.println("index is:" +index);
+			//System.out.println("index is:" +index);
 			counters.put(proc, index);
 			return portTable.get(proc).get(index);
 		}
@@ -71,7 +71,10 @@ public class mapperTable
 			{
 				IPAndPort ipp = temp.get(i);
 				if (reRegister (ipp, key) == true)
+				{
+					System.out.println("- Server " + ipp.getIP() + " is still offering prcedure number " + key.charAt(4));
 					newList.add(ipp);
+				}
 			}
 			if(newList.size() != 0)
 			{
@@ -148,6 +151,7 @@ public class mapperTable
 			replyDemarshaller.setStream(response);
 
 			if (replyDemarshaller.getResult() == 1)
+				
 				flag = true;
 			else
 				flag = false;

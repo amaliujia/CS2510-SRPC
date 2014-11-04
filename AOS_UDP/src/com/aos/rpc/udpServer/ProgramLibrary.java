@@ -16,11 +16,6 @@ public class ProgramLibrary
 		for(int i = 1; i <= numberOfProcedures; i++)
 			procedureNumbers[i-1] = i;
 	}
-
-	public String sayHello()
-	{
-		return "Hello";
-	}
 	
 	private void copyArray(double[] r, double[] v)
 	{
@@ -91,7 +86,6 @@ public class ProgramLibrary
 	//we assume it that we multiply it using the traditional 
 	public double[][] multiply(double[][] matrix1, double[][] matrix2) throws Exception
 	{
-		System.out.println("Multiplying");
 		int el1_r = matrix1.length;
 		int el1_c = matrix1[0].length;
 		int el2_r = matrix2.length;
@@ -113,7 +107,6 @@ public class ProgramLibrary
 		}
 		else
 			throw new Exception("Execution error: problem with matrix dimensions");
-		System.out.println("Multiplying DONEEEEEEEEEEEEEEEEEEE");
 		return result;
 	}
 

@@ -7,12 +7,9 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.util.LinkedList;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.aos.rpc.dataMarshalling.UDPDemarshaller;
 import com.aos.rpc.dataMarshalling.UDPMarshaller;
-import com.aos.rpc.helperClasses.RequestStatus;
 
 public class UDPServerStreamHandler
 {
@@ -25,9 +22,8 @@ public class UDPServerStreamHandler
 	private UDPMarshaller marshaller;
 	private UDPDemarshaller[] recievedParametersPackets;
 	private UDPMarshaller[] toSendResultsPackets;
-	private ConcurrentHashMap<String, LinkedList<RequestStatus>> stateKeeper;
 
-	public UDPServerStreamHandler(Socket tcpConnection, ConcurrentHashMap<String, LinkedList<RequestStatus>> stateKeeper) throws IOException
+	public UDPServerStreamHandler(Socket tcpConnection) throws IOException
 	{
 		this.tcpConnection = tcpConnection;
 		demarshaller = new UDPDemarshaller();
@@ -35,7 +31,6 @@ public class UDPServerStreamHandler
 		burstSize = 5;
 		udpSocket = new DatagramSocket(0);
 		udpSocket.setSoTimeout(10000);
-		this.stateKeeper = stateKeeper;
 		sendPortAndCloseTCP();
 	}
 	
@@ -43,7 +38,6 @@ public class UDPServerStreamHandler
 	{
 		DataOutputStream out = new DataOutputStream(tcpConnection.getOutputStream());
 		out.writeInt(udpSocket.getLocalPort());
-        System.out.println("port is:" + udpSocket.getLocalPort());
 		out.flush();
 		tcpConnection.close();
 	}
@@ -71,7 +65,7 @@ public class UDPServerStreamHandler
 	}
 
 	public void sendUdpResultsPackets() throws IOException
-	{		
+	{
 		boolean flag = true;
 		int attempts = 0;
 		long packetToSendNum = 0;
@@ -169,11 +163,15 @@ public class UDPServerStreamHandler
 
 		if (attempts == 3)
 		{
-			stateKeeper.remove(demarshaller.getTransactionID());
 			System.out.println("exceeded the attempts to recieve");
-			//delete the entry from the status table with TrID (give up the request)
 		}
 	}
+	
+	public String getClientAddress()
+	{
+		return clientAddress.getHostAddress();
+	}
+
 
 	public void setTcpConnection(Socket tcpConnection) {
 		this.tcpConnection = tcpConnection;

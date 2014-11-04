@@ -35,7 +35,7 @@ public class ServerRunTime
 		{
 			portMapper.registerAtPortMapper();
 		}
-		catch(IOException e)
+		catch(Exception e)
 		{
 			System.out.println("Error: connection with port mapper is lost, server cannot register the services");
 			mapperIsUp = false;

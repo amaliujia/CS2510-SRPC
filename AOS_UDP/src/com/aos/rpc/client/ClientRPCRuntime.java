@@ -22,17 +22,18 @@ public class ClientRPCRuntime
 	private int serverTCPPort;
 	private String serverIPString;
 	private int mapperPort;
-	private String mapperIPString;
+	private String mapperIPString, path;
 
 	private int serverUDPPort = 0;
 
-	public ClientRPCRuntime(String path) throws Exception
+	public ClientRPCRuntime() throws Exception
 	{
-		fillMapperIp(path);
+		this.path = "address";
 	}
 
-	private void fillMapperIp(String path) throws Exception
+	private void fillMapperIp() throws Exception
 	{
+		
 		String line = "";
 		File file = new File(path);
 		//change it to the afs path
@@ -44,9 +45,13 @@ public class ClientRPCRuntime
 		BufferedReader br = new BufferedReader(fr);
 		line = br.readLine();
 		br.close();
+		if(line == null)
+			throw new Exception("file is empty");
+
 		String[] ipandport = line.split(" ");
 		mapperIPString = ipandport[0];
 		mapperPort = Integer.valueOf(ipandport[1]);
+		
 	}
 
 
@@ -100,7 +105,7 @@ public class ClientRPCRuntime
 			}
 			catch (IOException e)
 			{
-				e.printStackTrace();
+				//e.printStackTrace();
 				System.out.println("Error:  1. Server is busy.  OR  2.TCP Connection between server and client failed. ");
 				serverUDPPort = 0;
 			}
@@ -112,6 +117,7 @@ public class ClientRPCRuntime
 	{
 		try
 		{
+			fillMapperIp();
 		//	System.out.println("Connecting to PortMapper on its port " + mapperPort);
 			Socket client = new Socket(mapperIPString, mapperPort);
 		//	System.out.println("Just connected to "+ client.getRemoteSocketAddress());
@@ -138,12 +144,13 @@ public class ClientRPCRuntime
 			demarshalReplyFromPortMapper (response);
 			client.close();
 		}
-		catch(IOException e)
+		catch(Exception e)
 		{
-			e.printStackTrace();
-			System.out.println("Error: 	1.TCP Connection between client and port mapper failed. OR 2. No port mapper available.");
+		//	e.printStackTrace();
 			serverIPString = "0.0.0.0";
 			serverTCPPort = 0;
+			System.out.println("Error: Communication with Name Server failed.");
+
 		}
 	}
 

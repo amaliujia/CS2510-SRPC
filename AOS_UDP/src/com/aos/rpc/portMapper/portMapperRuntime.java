@@ -54,7 +54,7 @@ public class portMapperRuntime
 		System.out.println("Waiting for register/request on port " + listeningPort + "...");
 		
 		refresher.start();
-		System.out.println ("The refreshing thread of Port Mapper starts working ...");
+		System.out.println ("The re-registering thread of Port Mapper starts working ...");
 		
 		while(true)
 		{

@@ -17,9 +17,9 @@ public class ClientStub
 	private ClientRPCRuntime runtime;
 	private double[][] result = null;
 	
-	public ClientStub (String path) throws Exception
+	public ClientStub () throws Exception
 	{
-		 runtime = new ClientRPCRuntime (path);
+		 runtime = new ClientRPCRuntime ();
 	}
 
 	public void stub(long prog, long progV, long proc, long tranID, long elem1c, long elem1r, long elem2c, long elem2r,double[] vector1, double[] vector2)
@@ -40,6 +40,7 @@ public class ClientStub
 
         byte[] requestToPortMapper = requestToPMMarshaller.getStream();
    		
+        
 	    runtime.requestMethodToPortMapper(requestToPortMapper);
 		
 

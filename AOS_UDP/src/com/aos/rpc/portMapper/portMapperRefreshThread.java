@@ -17,7 +17,11 @@ public class portMapperRefreshThread extends Thread
 			try 
 			{
 				Thread.sleep(300000);
+				System.out.println("- The port mapper starts re-registering...");
 				table.refreshAll ();
+				System.out.println("- The port mapper has done re-registering.");
+
+
 				
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
