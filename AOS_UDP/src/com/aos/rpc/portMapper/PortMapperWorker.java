@@ -9,7 +9,7 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 
 import com.aos.rpc.dataMarshalling.TCPMapperReplyMarshaller;
-import com.aos.rpc.dataMarshalling.TCPMapperRequestDemarshaller;
+import com.aos.rpc.dataMarshalling.TCPMapperRequestUnmarshaller;
 
 public class PortMapperWorker extends Thread
 {
@@ -36,24 +36,24 @@ public class PortMapperWorker extends Thread
 			for (int i = 0; i < requestSize; i++)
 				request[i] = (byte) in.read();
 
-            TCPMapperRequestDemarshaller  requestDemarshaller= new TCPMapperRequestDemarshaller();
-            requestDemarshaller.setStream(request);
+            TCPMapperRequestUnmarshaller  requestUnmarshaller= new TCPMapperRequestUnmarshaller();
+            requestUnmarshaller.setStream(request);
 
 
-            if(requestDemarshaller.isCRCError() == false)
+            if(requestUnmarshaller.isCRCError() == false)
             {
 
-                if (requestDemarshaller.getRequestType() == 0)
+                if (requestUnmarshaller.getRequestType() == 0)
                 {
 
-                    int ip1 = requestDemarshaller.getIp1();
-                    int ip2 = requestDemarshaller.getIp2();
-                    int ip3 = requestDemarshaller.getIp3();
-                    int ip4 = requestDemarshaller.getIp4();
-                    int port = requestDemarshaller.getPort();
-                    long prog = requestDemarshaller.getProgramNumber();
-                    long progV = requestDemarshaller.getProgramVersion();
-                    long proc = requestDemarshaller.getProcedureNumber();
+                    int ip1 = requestUnmarshaller.getIp1();
+                    int ip2 = requestUnmarshaller.getIp2();
+                    int ip3 = requestUnmarshaller.getIp3();
+                    int ip4 = requestUnmarshaller.getIp4();
+                    int port = requestUnmarshaller.getPort();
+                    long prog = requestUnmarshaller.getProgramNumber();
+                    long progV = requestUnmarshaller.getProgramVersion();
+                    long proc = requestUnmarshaller.getProcedureNumber();
                     String ipString = ip1 + "." + ip2 + "." + ip3 + "." + ip4;
                     String procedure = prog + "," + progV + "," + proc;
                     IPAndPort ipp = new IPAndPort(InetAddress.getByName(ipString), port);
@@ -79,11 +79,11 @@ public class PortMapperWorker extends Thread
 
 
                 }
-                else if (requestDemarshaller.getRequestType() == 1)
+                else if (requestUnmarshaller.getRequestType() == 1)
                 {
-                    long prog = requestDemarshaller.getProgramNumber();
-                    long progV = requestDemarshaller.getProgramVersion();
-                    long proc = requestDemarshaller.getProcedureNumber();
+                    long prog = requestUnmarshaller.getProgramNumber();
+                    long progV = requestUnmarshaller.getProgramVersion();
+                    long proc = requestUnmarshaller.getProcedureNumber();
 
                     String procedure = prog + "," + progV + "," + proc;
 

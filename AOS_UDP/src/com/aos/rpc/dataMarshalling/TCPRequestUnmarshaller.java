@@ -5,7 +5,7 @@ import java.nio.ByteOrder;
 import java.util.zip.CRC32;
 
 
-public class TCPRequestDemarshaller
+public class TCPRequestUnmarshaller
 {
 	//input
 	private byte[] stream;
@@ -36,7 +36,7 @@ public class TCPRequestDemarshaller
 	private CRC32 crcHandler;
 
 	
-	public TCPRequestDemarshaller()
+	public TCPRequestUnmarshaller()
 	{
 		stream = null;
 		buffer = null;
@@ -47,7 +47,7 @@ public class TCPRequestDemarshaller
 		numOfPackets = -1;
 	}
 	
-	private void demarshalRequest()
+	private void unmarshalRequest()
 	{
 		long recievedCRC = -1;
 		long calculatedCRC = -1;
@@ -104,7 +104,7 @@ public class TCPRequestDemarshaller
 	public void setStream(byte[] stream) {
 		resetAll();
 		this.stream = stream;
-		demarshalRequest();
+		unmarshalRequest();
 	}
 
 	public long getTransactionID() {

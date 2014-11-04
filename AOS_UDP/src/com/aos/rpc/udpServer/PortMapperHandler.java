@@ -16,7 +16,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.file.Path;
 
-import com.aos.rpc.dataMarshalling.TCPMapperReplyDemarshaller;
+import com.aos.rpc.dataMarshalling.TCPMapperReplyUnmarshaller;
 import com.aos.rpc.dataMarshalling.TCPMapperRequestMarshaller;
 
 public class PortMapperHandler
@@ -28,7 +28,7 @@ public class PortMapperHandler
 	private int[] ip;
 	private int port;
 	private TCPMapperRequestMarshaller marshal;
-	private TCPMapperReplyDemarshaller demarshal;
+	private TCPMapperReplyUnmarshaller unmarshal;
 
 
 	public PortMapperHandler(String mapperPath, String serverIp, int serverPort) throws Exception
@@ -36,7 +36,7 @@ public class PortMapperHandler
 		portMapperPath = mapperPath;
 		program = new ProgramLibrary();
 		marshal = new TCPMapperRequestMarshaller();
-		demarshal = new TCPMapperReplyDemarshaller();
+		unmarshal = new TCPMapperReplyUnmarshaller();
 		ip = new int[4];
 		port = serverPort;
 		portMapperPath = mapperPath;
@@ -90,7 +90,7 @@ public class PortMapperHandler
 				reply[i] = (byte) in.read();
 
 			//formatting the reply to String (unmarshalling)
-			demarshal.setStream(reply);
+			unmarshal.setStream(reply);
 			mapper.close();
 	}
 
@@ -113,7 +113,7 @@ public class PortMapperHandler
 			if(marshal.formStream())
 			{
 				communicate(marshal.getStream());
-				if(demarshal.getResult() == 0)
+				if(unmarshal.getResult() == 0)
 				{
 					result = false;
 				}

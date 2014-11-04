@@ -12,8 +12,8 @@ import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import com.aos.rpc.dataMarshalling.TCPMapperReplyDemarshaller;
-import com.aos.rpc.dataMarshalling.UDPDemarshaller;
+import com.aos.rpc.dataMarshalling.TCPMapperReplyUnmarshaller;
+import com.aos.rpc.dataMarshalling.UDPUnmarshaller;
 import com.aos.rpc.dataMarshalling.UDPMarshaller;
 
 
@@ -55,7 +55,7 @@ public class ClientRPCRuntime
 	}
 
 
-	public UDPDemarshaller[] dataToServer (UDPMarshaller[] udpMarshallers, int elementsToReceive, long tranID)
+	public UDPUnmarshaller[] dataToServer (UDPMarshaller[] udpMarshallers, int elementsToReceive, long tranID)
 			throws IOException
 	{
 		if (serverIPString != "0.0.0.0" && serverUDPPort != 0)
@@ -141,7 +141,7 @@ public class ClientRPCRuntime
 			byte[] response = new byte[replySize];
 			for (int i = 0; i < replySize; i++)
 				response[i] = (byte) in.read();
-			demarshalReplyFromPortMapper (response);
+			unmarshalReplyFromPortMapper (response);
 			client.close();
 		}
 		catch(Exception e)
@@ -154,23 +154,23 @@ public class ClientRPCRuntime
 		}
 	}
 
-	private void demarshalReplyFromPortMapper (byte[] response)
+	private void unmarshalReplyFromPortMapper (byte[] response)
 	{
-		TCPMapperReplyDemarshaller replyDemarshaller = new TCPMapperReplyDemarshaller();
-		replyDemarshaller.setStream(response);
-		if (replyDemarshaller.getType() == 2) 
+		TCPMapperReplyUnmarshaller replyUnmarshaller = new TCPMapperReplyUnmarshaller();
+		replyUnmarshaller.setStream(response);
+		if (replyUnmarshaller.getType() == 2) 
 		{
-			int ip1 = replyDemarshaller.getIp1();
-			int ip2 = replyDemarshaller.getIp2();
-			int ip3 = replyDemarshaller.getIp3();
-			int ip4 = replyDemarshaller.getIp4();
+			int ip1 = replyUnmarshaller.getIp1();
+			int ip2 = replyUnmarshaller.getIp2();
+			int ip3 = replyUnmarshaller.getIp3();
+			int ip4 = replyUnmarshaller.getIp4();
 
 			serverIPString = ip1 + "." +ip2 + "." + ip3 + "." + ip4 ;
-			serverTCPPort = replyDemarshaller.getPort();
+			serverTCPPort = replyUnmarshaller.getPort();
 
 	//		System.out.println("The corresponding IP and port acquired from the PortMapper is   " + serverIPString + ":" +serverTCPPort);
 		}
-		else if (replyDemarshaller.getType() == 0)
+		else if (replyUnmarshaller.getType() == 0)
 		{
 			System.out.println("Error: (In Client Side) PortMapper being busy");
 			serverIPString = "0.0.0.0";

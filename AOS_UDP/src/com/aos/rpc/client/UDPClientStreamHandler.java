@@ -6,7 +6,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketTimeoutException;
 
-import com.aos.rpc.dataMarshalling.UDPDemarshaller;
+import com.aos.rpc.dataMarshalling.UDPUnmarshaller;
 import com.aos.rpc.dataMarshalling.UDPMarshaller;
 import com.aos.rpc.helperClasses.ServerSegmentation;
 
@@ -14,7 +14,7 @@ public class UDPClientStreamHandler {
     private int serverUDPPort;
     private String serverIPString;
     private UDPMarshaller[] udpMarshallers;
-    private UDPDemarshaller udpDemarshaller;
+    private UDPUnmarshaller udpUnmarshaller;
     private int burstSize;
     //private ByteBuffer[] recievedResultsPackets;
     private int numberOfPacketsToSend;
@@ -24,7 +24,7 @@ public class UDPClientStreamHandler {
 
     private int numberOfPacketsToReceive;
     private int reminderOfElements;
-    UDPDemarshaller[] recievedResultPackets = null;
+    UDPUnmarshaller[] recievedResultPackets = null;
     private long TrID;
 
     public UDPClientStreamHandler(int serverUDPPort, String serverIPString, UDPMarshaller[] udpMarshallers, int elementsToReceive, long tranID)
@@ -35,7 +35,7 @@ public class UDPClientStreamHandler {
         this.serverIPString = serverIPString;
         //toSendParamPackets = new ByteBuffer[numberOfPacketsToSend];
         this.udpMarshallers = udpMarshallers;
-        udpDemarshaller = new UDPDemarshaller();
+        udpUnmarshaller = new UDPUnmarshaller();
         burstSize = 5;
         numberOfPacketsToSend = udpMarshallers.length;
 
@@ -54,7 +54,7 @@ public class UDPClientStreamHandler {
             numberOfPacketsToReceive = elementsToReceive / 512 + 1;
         }
 
-        UDPDemarshaller[] recievedParametersPackets = new UDPDemarshaller[numberOfPacketsToReceive];
+        UDPUnmarshaller[] recievedParametersPackets = new UDPUnmarshaller[numberOfPacketsToReceive];
         this.TrID = tranID;
 
 
@@ -65,9 +65,9 @@ public class UDPClientStreamHandler {
         boolean flag = true;
         int attempts = 0;
         long neededPacket = 1;
-        recievedResultPackets = new UDPDemarshaller[numberOfPacketsToReceive];
+        recievedResultPackets = new UDPUnmarshaller[numberOfPacketsToReceive];
 
-       UDPDemarshaller demarshaller = new UDPDemarshaller();
+       UDPUnmarshaller unmarshaller = new UDPUnmarshaller();
 
         while ((attempts < 3) && ((neededPacket - 1) < numberOfPacketsToReceive))
         {
@@ -80,20 +80,20 @@ public class UDPClientStreamHandler {
                     byte[] buffer = new byte[4122];
                     DatagramPacket receivePacket = new DatagramPacket(buffer, buffer.length);
                     udpClientSocket.receive(receivePacket);
-                    demarshaller.setStream(getTheRightStream(receivePacket.getData(), receivePacket.getLength()));
-                    if (!demarshaller.isCRCError())
+                    unmarshaller.setStream(getTheRightStream(receivePacket.getData(), receivePacket.getLength()));
+                    if (!unmarshaller.isCRCError())
                     {
-                        if (demarshaller.getSequenceID() == neededPacket)
+                        if (unmarshaller.getSequenceID() == neededPacket)
                         {
-                        	if (demarshaller.getSequenceID() == 1 && demarshaller.getType() == 0)
+                        	if (unmarshaller.getSequenceID() == 1 && unmarshaller.getType() == 0)
                         	{
                         		sendAck(neededPacket+1);
-                                recievedResultPackets[(int) neededPacket - 1] = demarshaller;
+                                recievedResultPackets[(int) neededPacket - 1] = unmarshaller;
 
                         		return;
                         	}
-                            recievedResultPackets[(int) neededPacket - 1] = demarshaller;
-                            demarshaller = new UDPDemarshaller();
+                            recievedResultPackets[(int) neededPacket - 1] = unmarshaller;
+                            unmarshaller = new UDPUnmarshaller();
                             attempts = 0;
                             neededPacket++;
                         } else
@@ -180,12 +180,12 @@ public class UDPClientStreamHandler {
                 byte[] buffer = new byte[26];
                 DatagramPacket receivePacket = new DatagramPacket(buffer, buffer.length);
                 udpClientSocket.receive(receivePacket);
-                udpDemarshaller.resetAll();
+                udpUnmarshaller.resetAll();
 
-                udpDemarshaller.setStream(getTheRightStream(receivePacket.getData(), receivePacket.getLength()));
+                udpUnmarshaller.setStream(getTheRightStream(receivePacket.getData(), receivePacket.getLength()));
 
-                if (!udpDemarshaller.isCRCError()) {
-                    packetToSendNum = udpDemarshaller.getSequenceID() - 1;
+                if (!udpUnmarshaller.isCRCError()) {
+                    packetToSendNum = udpUnmarshaller.getSequenceID() - 1;
 
                     attempts = 0;
                 }
@@ -216,7 +216,7 @@ public class UDPClientStreamHandler {
 //    {
 //        this.TrID = TrID;
 //    }
-    public UDPDemarshaller[] getRecievedResultPackets()
+    public UDPUnmarshaller[] getRecievedResultPackets()
     {
         return this.recievedResultPackets;
     }

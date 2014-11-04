@@ -1,11 +1,11 @@
 package com.aos.rpc.helperClasses;
 
 
-import com.aos.rpc.dataMarshalling.UDPDemarshaller;
+import com.aos.rpc.dataMarshalling.UDPUnmarshaller;
 
 public class ServerDesegmentation
 {
-	private UDPDemarshaller[] demarshallers;
+	private UDPUnmarshaller[] unmarshallers;
 	private long numberOfElements1_r;	
 	private long numberOfElements1_c;
 	private long numberOfElements2_r;	
@@ -17,7 +17,7 @@ public class ServerDesegmentation
 	
 	public ServerDesegmentation()
 	{		
-		demarshallers = null;
+		unmarshallers = null;
 		vector1 = vector2 = null;
 		parametersReady = false;
 	}
@@ -28,9 +28,9 @@ public class ServerDesegmentation
 		int majorHolderSize = (int)numberOfElements1_r*(int)numberOfElements1_c + (int)numberOfElements2_r*(int)numberOfElements2_c;
 		double[] majorHolder = new double[majorHolderSize];
 		
-		for(int i = 0; i < demarshallers.length; i++)
+		for(int i = 0; i < unmarshallers.length; i++)
 		{
-			double[] tempVector = demarshallers[i].getVector();
+			double[] tempVector = unmarshallers[i].getVector();
 			for(int j = 0; j < tempVector.length; j++)
 				majorHolder[counter++] = tempVector[j];
 		}
@@ -74,8 +74,8 @@ public class ServerDesegmentation
 		return vector2;
 	}
 
-	public void setDemarshallers(UDPDemarshaller[] demarshallers) {
-		this.demarshallers = demarshallers;
+	public void setUnmarshallers(UDPUnmarshaller[] unmarshallers) {
+		this.unmarshallers = unmarshallers;
 	}
 
 	public void setNumberOfElements1_r(long numberOfElements1_r) {
@@ -103,7 +103,7 @@ public class ServerDesegmentation
 	{
 		boolean result = false;
 		boolean flag = (numberOfElements1_r != -1) && (numberOfElements1_c != -1) && (numberOfElements2_r != -1) 
-				&& (numberOfElements2_c != -1) && (demarshallers != null);
+				&& (numberOfElements2_c != -1) && (unmarshallers != null);
 		if(flag)
 		{
 			constructVectors();

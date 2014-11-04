@@ -51,7 +51,7 @@ public class Testing {
 //		reqMar.formStream();
 //		System.out.println(reqMar.isRequestReady());
 ////		
-//		TCPRequestDemarshaller reqDem = new TCPRequestDemarshaller();
+//		TCPRequestUnmarshaller reqDem = new TCPRequestUnmarshaller();
 //		reqDem.setStream(reqMar.getStream());
 //		System.out.println(reqDem.getProgramNumber());
 //		System.out.println(reqDem.getProgramVersion());
@@ -84,7 +84,7 @@ public class Testing {
 //		System.out.println(repMar.isReplyReady());
 //		
 //		
-//		TCPReplyDemarshaller dem = new TCPReplyDemarshaller();
+//		TCPReplyUnmarshaller dem = new TCPReplyUnmarshaller();
 //		dem.setStream(repMar.getStream());
 //		System.out.println(dem.getTransactionID());
 //		System.out.println(dem.getNumberOfElements());
@@ -103,7 +103,7 @@ public class Testing {
 //		System.out.println(m.isRequestReady());
 //		
 //		
-//		TCPMapperRequestDemarshaller d = new TCPMapperRequestDemarshaller();
+//		TCPMapperRequestUnmarshaller d = new TCPMapperRequestUnmarshaller();
 //		d.setStream(m.getStream());
 //		System.out.println(d.isCRCError());
 //		System.out.println(d.getIp1());
@@ -126,7 +126,7 @@ public class Testing {
 //		System.out.println(m.isRequestReady());
 //		
 //		
-//		TCPMapperRequestDemarshaller d = new TCPMapperRequestDemarshaller();
+//		TCPMapperRequestUnmarshaller d = new TCPMapperRequestUnmarshaller();
 //		d.setStream(m.getStream());
 //		System.out.println(d.isCRCError());
 ////		System.out.println(d.getIp1());
@@ -150,7 +150,7 @@ public class Testing {
 //		System.out.println(m.isRequestReady());
 //		
 //		
-//		TCPMapperRequestDemarshaller d = new TCPMapperRequestDemarshaller();
+//		TCPMapperRequestUnmarshaller d = new TCPMapperRequestUnmarshaller();
 //		d.setStream(m.getStream());
 //		System.out.println(d.isCRCError());
 //		System.out.println(d.getIp1());
@@ -171,7 +171,7 @@ public class Testing {
 //		System.out.println(m.isReplyReady());
 //		
 //		
-//		TCPMapperReplyDemarshaller d = new TCPMapperReplyDemarshaller();
+//		TCPMapperReplyUnmarshaller d = new TCPMapperReplyUnmarshaller();
 //		d.setStream(m.getStream());
 //		System.out.println(d.isCrcError());
 //		System.out.println(d.getResult());
@@ -185,7 +185,7 @@ public class Testing {
 //		System.out.println(m.isReplyReady());
 //		
 //		
-//		TCPMapperReplyDemarshaller d = new TCPMapperReplyDemarshaller();
+//		TCPMapperReplyUnmarshaller d = new TCPMapperReplyUnmarshaller();
 //		d.setStream(m.getStream());
 //		System.out.println(d.isCrcError());
 //		System.out.println(d.getIp1() + " " + d.getIp2() + " " + d.getIp3() + " " + d.getIp4() + " " + d.getPort());
@@ -203,7 +203,7 @@ public class Testing {
 //		System.out.println(m.isReplyReady());
 //		
 //		
-//		TCPMapperReplyDemarshaller d = new TCPMapperReplyDemarshaller();
+//		TCPMapperReplyUnmarshaller d = new TCPMapperReplyUnmarshaller();
 //		d.setStream(m.getStream());
 //		System.out.println(d.isCrcError());
 //		System.out.println(d.getIp1() + " " + d.getIp2() + " " + d.getIp3() + " " + d.getIp4() + " " + d.getPort());

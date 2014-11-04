@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.zip.CRC32;
 
-public class TCPReplyDemarshaller
+public class TCPReplyUnmarshaller
 {
 	//input
 	private byte[] stream;
@@ -36,7 +36,7 @@ public class TCPReplyDemarshaller
 	private CRC32 crcHandler;
 
 
-	public TCPReplyDemarshaller()
+	public TCPReplyUnmarshaller()
 	{
 		stream = null;
 		resultVector1 = resultVector2 = null;
@@ -48,7 +48,7 @@ public class TCPReplyDemarshaller
 		type = -1;
 	}
 
-	private void demarshalReply()
+	private void unmarshalReply()
 	{
 		long recievedCRC = -1;
 		long calculatedCRC = -1;
@@ -109,7 +109,7 @@ public class TCPReplyDemarshaller
 	public void setStream(byte[] stream) {
 		resetAll();
 		this.stream = stream;
-		demarshalReply();
+		unmarshalReply();
 	}
 
 	public long getTransactionID() {

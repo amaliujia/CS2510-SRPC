@@ -1,4 +1,4 @@
-package com.aos.rpc.client;
+package com.aos.rpc.helperClasses;
 
 import com.aos.rpc.abusingClient.Client;
 import com.aos.rpc.dataMarshalling.UDPMarshaller;

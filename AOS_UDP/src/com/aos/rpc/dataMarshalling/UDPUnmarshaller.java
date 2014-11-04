@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.zip.CRC32;
 
-public class UDPDemarshaller
+public class UDPUnmarshaller
 {
 	//input
 	private byte[] stream;
@@ -33,7 +33,7 @@ public class UDPDemarshaller
 	private boolean udpReady;
 
 	
-	public UDPDemarshaller()
+	public UDPUnmarshaller()
 	{
 		stream = null;
 		buffer = null;
@@ -44,7 +44,7 @@ public class UDPDemarshaller
 		type = -1;
 	}
 	
-	private void demarshalRequest()
+	private void unmarshalRequest()
 	{
 		long recievedCRC = -1;
 		long calculatedCRC = -1;
@@ -100,7 +100,7 @@ public class UDPDemarshaller
 		resetAll();
 		this.stream = stream;
 		vectorSize = (this.stream.length - 26) / 8;
-		demarshalRequest();
+		unmarshalRequest();
 	}
 
 	public long getTransactionID() {

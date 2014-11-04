@@ -8,9 +8,11 @@ import java.nio.ByteBuffer;
 import javax.management.relation.Relation;
 
 import com.aos.rpc.dataMarshalling.TCPMapperRequestMarshaller;
-import com.aos.rpc.dataMarshalling.TCPReplyDemarshaller;
+import com.aos.rpc.dataMarshalling.TCPReplyUnmarshaller;
 import com.aos.rpc.dataMarshalling.TCPRequestMarshaller;
-import com.aos.rpc.dataMarshalling.UDPDemarshaller;
+import com.aos.rpc.dataMarshalling.UDPUnmarshaller;
+import com.aos.rpc.helperClasses.ClientDesegmentation;
+import com.aos.rpc.helperClasses.ClientSegmentation;
 
 public class ClientStub
 {
@@ -89,33 +91,33 @@ public class ClientStub
         else
             resultSizeToReceive = (int)(elem1r * elem2c);
 
-        UDPDemarshaller[] udpDemarshallers = runtime.dataToServer(seg.getUDPMarshallers(), resultSizeToReceive , tranID);
-        ClientDesegmentation deseg = new ClientDesegmentation(udpDemarshallers);
+        UDPUnmarshaller[] udpUnmarshallers = runtime.dataToServer(seg.getUDPMarshallers(), resultSizeToReceive , tranID);
+        ClientDesegmentation deseg = new ClientDesegmentation(udpUnmarshallers);
         deseg.setRowSize(elem1r);
 
         deseg.setColumnSize(resultSizeToReceive/elem1r);
-        if (udpDemarshallers != null)
+        if (udpUnmarshallers != null)
         	deseg.reorganize();
         
         result = deseg.getVectorFinal();
 
     }
 	
-//	public void demarshalReplyFromServer (byte[] response)
+//	public void unmarshalReplyFromServer (byte[] response)
 //	{
 //		long tranID;
 //		long elem1c, elem1r, elem2c, elem2r;
 //		double[] vector1, vector2;
 //
-//		TCPReplyDemarshaller replyDemarshaller = new TCPReplyDemarshaller();
-//        replyDemarshaller.setStream(response);
-//        elem1c = replyDemarshaller.getNumberOfElements1_c();
-//        elem1r = replyDemarshaller.getNumberOfElements1_r();
-//        elem2c = replyDemarshaller.getNumberOfElements2_c();
-//        elem2r = replyDemarshaller.getNumberOfElements2_r();
-//        tranID = replyDemarshaller.getTransactionID();
-//        vector1 = replyDemarshaller.getResultVector1();
-//        vector2 = replyDemarshaller.getResultVector2();
+//		TCPReplyUnmarshaller replyUnmarshaller = new TCPReplyUnmarshaller();
+//        replyUnmarshaller.setStream(response);
+//        elem1c = replyUnmarshaller.getNumberOfElements1_c();
+//        elem1r = replyUnmarshaller.getNumberOfElements1_r();
+//        elem2c = replyUnmarshaller.getNumberOfElements2_c();
+//        elem2r = replyUnmarshaller.getNumberOfElements2_r();
+//        tranID = replyUnmarshaller.getTransactionID();
+//        vector1 = replyUnmarshaller.getResultVector1();
+//        vector2 = replyUnmarshaller.getResultVector2();
 //
 //
 //        result1 = new double[(int) elem1r][(int)elem1c];

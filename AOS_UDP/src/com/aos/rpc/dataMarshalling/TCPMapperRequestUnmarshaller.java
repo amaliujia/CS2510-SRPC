@@ -7,7 +7,7 @@ import java.util.zip.CRC32;
 /*
  * - check CRC here
  */
-public class TCPMapperRequestDemarshaller
+public class TCPMapperRequestUnmarshaller
 {
 	//input
 	private byte[] stream;
@@ -40,7 +40,7 @@ public class TCPMapperRequestDemarshaller
 	private boolean requestReady;
 	private boolean crcError;
 
-	public TCPMapperRequestDemarshaller()
+	public TCPMapperRequestUnmarshaller()
 	{
 		stream = null;
 		buffer = null;
@@ -65,7 +65,7 @@ public class TCPMapperRequestDemarshaller
 	}
 
 
-	private void demarshalRequest()
+	private void unmarshalRequest()
 	{
 		long recievedCRC = -1;
 		long calculatedCRC = -1;
@@ -148,7 +148,7 @@ public class TCPMapperRequestDemarshaller
 	public void setStream(byte[] stream) {
 		resetAll();
 		this.stream = stream;
-		demarshalRequest();
+		unmarshalRequest();
 	}
 
 	public short getType() {

@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.zip.CRC32;
 
-public class TCPMapperReplyDemarshaller
+public class TCPMapperReplyUnmarshaller
 {
 	//input
 	private byte[] stream;
@@ -41,7 +41,7 @@ public class TCPMapperReplyDemarshaller
 	private CRC32 crcHandler;
 
 
-	public TCPMapperReplyDemarshaller()
+	public TCPMapperReplyUnmarshaller()
 	{
 		stream = null;
 		buffer = null;
@@ -64,7 +64,7 @@ public class TCPMapperReplyDemarshaller
 	}
 
 
-	private void demarshalReply()
+	private void unmarshalReply()
 	{
 		long recievedCRC = -1;
 		long calculatedCRC = -1;
@@ -122,7 +122,7 @@ public class TCPMapperReplyDemarshaller
 	public void setStream(byte[] stream) {
 		resetAll();
 		this.stream = stream;
-		demarshalReply();
+		unmarshalReply();
 	}
 
 	public short getType() {

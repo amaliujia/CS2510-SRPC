@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import com.aos.rpc.dataMarshalling.TCPMapperReplyDemarshaller;
+import com.aos.rpc.dataMarshalling.TCPMapperReplyUnmarshaller;
 import com.aos.rpc.dataMarshalling.TCPMapperRequestMarshaller;
 
 
@@ -147,10 +147,10 @@ public class mapperTable
 
 			socket.close();
 
-			TCPMapperReplyDemarshaller replyDemarshaller = new TCPMapperReplyDemarshaller();
-			replyDemarshaller.setStream(response);
+			TCPMapperReplyUnmarshaller replyUnmarshaller = new TCPMapperReplyUnmarshaller();
+			replyUnmarshaller.setStream(response);
 
-			if (replyDemarshaller.getResult() == 1)
+			if (replyUnmarshaller.getResult() == 1)
 				
 				flag = true;
 			else

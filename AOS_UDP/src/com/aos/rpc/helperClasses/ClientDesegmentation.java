@@ -1,19 +1,19 @@
-package com.aos.rpc.client;
+package com.aos.rpc.helperClasses;
 
-import com.aos.rpc.dataMarshalling.UDPDemarshaller;
+import com.aos.rpc.dataMarshalling.UDPUnmarshaller;
 
 /**
  * Created by zhangchi on Oct/29/14.
  */
 public class ClientDesegmentation
 {
-	private UDPDemarshaller[] udpDemarshallers;
+	private UDPUnmarshaller[] udpUnmarshallers;
 	private long rowSize, columnSize;
 	private double[] vector = null;
 	private double[][] vectorFinal = null;
-	public ClientDesegmentation (UDPDemarshaller[] demarshallers)
+	public ClientDesegmentation (UDPUnmarshaller[] unmarshallers)
 	{
-		udpDemarshallers = demarshallers;
+		udpUnmarshallers = unmarshallers;
 	}
 
 	public void reorganize ()
@@ -24,7 +24,7 @@ public class ClientDesegmentation
 		int previousIndex = 0;
 		int i, j;
 
-		if (udpDemarshallers[0].getType() == 0)
+		if (udpUnmarshallers[0].getType() == 0)
 		{
 			System.out.println("Error: Execution time exception occured.");
 			this.vectorFinal = null;
@@ -32,13 +32,13 @@ public class ClientDesegmentation
 
 		else 
 		{
-			for ( i = 0; i < udpDemarshallers.length; i ++)
+			for ( i = 0; i < udpUnmarshallers.length; i ++)
 			{
 
-				int streamSize = udpDemarshallers[i].getVector().length;
+				int streamSize = udpUnmarshallers[i].getVector().length;
 				for ( j = 0; j < streamSize; j++)
 				{
-					vector[previousIndex + j] = udpDemarshallers[i].getVector()[j];
+					vector[previousIndex + j] = udpUnmarshallers[i].getVector()[j];
 
 				}
 				previousIndex = previousIndex + j;
