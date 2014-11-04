@@ -15,7 +15,7 @@ import com.aos.rpc.dataMarshalling.UDPDemarshaller;
 public class ClientStub
 {
 	private ClientRPCRuntime runtime;
-	private double[][] result;
+	private double[][] result = null;
 	
 	public ClientStub (String path) throws Exception
 	{
@@ -88,11 +88,14 @@ public class ClientStub
         else
             resultSizeToReceive = (int)(elem1r * elem2c);
 
-        ClientDesegmentation deseg = new ClientDesegmentation(runtime.dataToServer(seg.getUDPMarshallers(), resultSizeToReceive , tranID) );
+        UDPDemarshaller[] udpDemarshallers = runtime.dataToServer(seg.getUDPMarshallers(), resultSizeToReceive , tranID);
+        ClientDesegmentation deseg = new ClientDesegmentation(udpDemarshallers);
         deseg.setRowSize(elem1r);
 
         deseg.setColumnSize(resultSizeToReceive/elem1r);
-        deseg.reorganize();
+        if (udpDemarshallers != null)
+        	deseg.reorganize();
+        
         result = deseg.getVectorFinal();
 
     }

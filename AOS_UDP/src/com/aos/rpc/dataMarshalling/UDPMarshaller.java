@@ -21,6 +21,7 @@ public class UDPMarshaller
 	
 	//data
 	private long sequenceID;
+	
 	private long transactionID;
 	private double[] vector;
 	

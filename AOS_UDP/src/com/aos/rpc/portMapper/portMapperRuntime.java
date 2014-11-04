@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
 import com.aos.rpc.dataMarshalling.TCPMapperReplyMarshaller;
@@ -48,7 +49,7 @@ public class portMapperRuntime
 		bw.close();
 	}
 	
-	public void run () throws InterruptedException
+	public void run () throws InterruptedException, SocketTimeoutException
 	{
 		System.out.println("Waiting for register/request on port " + listeningPort + "...");
 		
@@ -96,6 +97,7 @@ public class portMapperRuntime
 				else
 				{
 
+					System.out.println("Error: PortMapper busy");
                     DataOutputStream out = new DataOutputStream(tcpConnection.getOutputStream());
 
 
@@ -115,12 +117,21 @@ public class portMapperRuntime
 
                 }
 			} 
+			catch (SocketTimeoutException e)
+			{
+				e.printStackTrace();
+
+				System.out.println("Error: Socket Time Out in PortMapper");
+			}
+
 			catch (IOException e)
 			{
 				e.printStackTrace();
+				System.out.println("Error: Cloesd Connection detected in PortMapper");
 			}
 		}
 	}
+	
 	
 
 }
