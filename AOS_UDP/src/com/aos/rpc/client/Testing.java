@@ -11,8 +11,8 @@ public class Testing
 	public static void main (String[] args) throws Exception
 	{
 		double[] onedim = new double[10];
-		double[][] twodim1 = new double[900][900];
-		double[][] twodim2 = new double[900][900];
+		double[][] twodim1 = new double[1200][1200];
+		double[][] twodim2 = new double[1200][1200];
 		
 		//double[][] twodim1 = new double[2][3];
 		//double[][] twodim2 = new double[3][2];
@@ -33,28 +33,77 @@ public class Testing
 		
 		ClientInterface cInterface = new ClientInterface("address");
 		
+		System.out.println("\n\n------------------------------------------------------------------------------");
+		System.out.println("------------------------------------------------------------------------------");
+
 		System.out.println("We are going to sort the array of ...");
 		printOnedim(onedim);
 		System.out.println("The sorted array is ... ");
-      //  cInterface.sort(onedim);
-		printOnedim(cInterface.sort(onedim));
+		double [] ans1 = cInterface.sort(onedim);
+		if (ans1 == null)
+		{
+			System.out.println("Error happens in sort");
+		}
+		else {
+			printOnedim(ans1);
+		}
 		
+		System.out.println("\n\n------------------------------------------------------------------------------");
+		System.out.println("------------------------------------------------------------------------------");
+
 		System.out.println("We are going to get the min from the array of ...");
 		printOnedim(onedim);
-		System.out.println("The min is ... \n" + cInterface.min(onedim));
-    //    cInterface.min(onedim);
+		//System.out.println("The min is ... \n" + cInterface.min(onedim));
+        double ans2 = cInterface.min(onedim);
+		if (ans2 == -1)
+		{
+			System.out.println("Error happens in min");
+		}
+		else 
+		{
+			System.out.println("The min is ... \n" + ans2);
+		}
+        
+		
+		System.out.println("\n\n------------------------------------------------------------------------------");
 
+		System.out.println("------------------------------------------------------------------------------");
+
+		
 		System.out.println("We are going to get the max from the array of ...");
 		printOnedim(onedim);
-		//System.out.println("The max is ... \n" + cInterface.max(onedim));
-        cInterface.max(onedim);
+		System.out.println("The max is ... \n" + cInterface.max(onedim));
+        double ans3 = cInterface.max(onedim);
+		if (ans3 == -1)
+		{
+			System.out.println("Error happens in max");
+		}
+		else 
+		{
+			System.out.println("The max is ... \n" + ans3);
+		}
+		
+		
+		System.out.println("\n\n------------------------------------------------------------------------------");
+		System.out.println("------------------------------------------------------------------------------");
+
+		
 
 		System.out.println("We are going to multiply two matrices ...");
 		//printTwodim(twodim1);
 		//printTwodim(twodim2);
 		System.out.println("The result is ... ") ;
-		//printTwodim(cInterface.multiplication(twodim1, twodim2));
-        cInterface.multiplication(twodim1, twodim2);
+        double[][] ans4 = cInterface.multiplication(twodim1, twodim2);
+        
+        if (ans4 == null)
+		{
+			System.out.println("Error happens in mult");
+		}
+		else 
+		{
+		    printTwodim(ans4);
+		}
+
 		
 	}
 	

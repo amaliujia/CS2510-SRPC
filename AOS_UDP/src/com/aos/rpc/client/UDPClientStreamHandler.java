@@ -24,7 +24,7 @@ public class UDPClientStreamHandler {
 
     private int numberOfPacketsToReceive;
     private int reminderOfElements;
-    UDPDemarshaller[] recievedResultPackets;
+    UDPDemarshaller[] recievedResultPackets = null;
     private long TrID;
 
     public UDPClientStreamHandler(int serverUDPPort, String serverIPString, UDPMarshaller[] udpMarshallers, int elementsToReceive, long tranID)
@@ -40,7 +40,7 @@ public class UDPClientStreamHandler {
         numberOfPacketsToSend = udpMarshallers.length;
 
         udpClientSocket = new DatagramSocket(0);
-        udpClientSocket.setSoTimeout(10000);
+        udpClientSocket.setSoTimeout(30000);
 
 
         //Initialize packets to receive
@@ -108,12 +108,13 @@ public class UDPClientStreamHandler {
         if (attempts == 3)
         {
             //delete the entry from the status table with TrID (give up the request)
-            System.out.println("Give up when receiving the result from server!!!");
+            System.out.println("Error: Time out when receiving the result from server!!!");
+            recievedResultPackets = null;
         }
         else if (neededPacket == numberOfPacketsToReceive)
         {
             //I receieved everything perfectly
-            System.out.println("I receieved result perfectly from the server!!!");
+        //    System.out.println("I receieved result perfectly from the server!!!");
         }
     }
 
@@ -131,7 +132,8 @@ public class UDPClientStreamHandler {
         udpClientSocket.send(ack);
     }
 
-    private byte[] getTheRightStream(byte[] bufferStream, int length) {
+    private byte[] getTheRightStream(byte[] bufferStream, int length) 
+    {
         byte[] result = new byte[length];
 
         for (int i = 0; i < length; i++)
@@ -141,23 +143,17 @@ public class UDPClientStreamHandler {
     }
 
 
-    //	private void fillMarshaller(long trID, long neededPacket)
-    //	{
-    //		marshaller.setSequenceID(trID);
-    //		marshaller.setSequenceID(neededPacket);
-    //		marshaller.setVectorSize(0);
-    //		marshaller.setType((short)2);
-    //		marshaller.formStream();
-    //	}
 
-
-    public void sendUdpParametersPackets() throws IOException {
+    public void sendUdpParametersPackets() throws IOException 
+    {
         boolean flag = true;
         int attempts = 0;
         long packetToSendNum = 0;
 
-        while ((attempts < 3) && (packetToSendNum < numberOfPacketsToSend) && flag) {
-            for (int i = 0; i < burstSize; i++) {
+        while ((attempts < 3) && (packetToSendNum < numberOfPacketsToSend) && flag) 
+        {
+            for (int i = 0; i < burstSize; i++) 
+            {
                 //byte[] stream = new byte[toSendParamPackets[(int)packetToSendNum - 1].capacity()];
                 if (packetToSendNum + i >= numberOfPacketsToSend) {
                     packetToSendNum = packetToSendNum + i;
@@ -167,7 +163,8 @@ public class UDPClientStreamHandler {
                 DatagramPacket packetToSend = new DatagramPacket(stream, stream.length, InetAddress.getByName(serverIPString), serverUDPPort);
                 udpClientSocket.send(packetToSend);
             }
-            try {
+            try 
+            {
                 byte[] buffer = new byte[26];
                 DatagramPacket receivePacket = new DatagramPacket(buffer, buffer.length);
                 udpClientSocket.receive(receivePacket);
@@ -180,19 +177,24 @@ public class UDPClientStreamHandler {
 
                     attempts = 0;
                 }
-            } catch (SocketTimeoutException ste) {
+            } catch (SocketTimeoutException ste)
+            {
                 attempts++;
                 if (attempts == 3)
                     flag = false;
             }
         }
 
-        if (attempts == 3) {
+        if (attempts == 3) 
+        {
             //give up and issue a new request
-            System.out.println("Give up!!!");
+            //System.out.println("Give up!!!");
+            System.out.println("Error: Time out when sending the parameters to server!!!");
+            recievedResultPackets = null;
+
 
         } else if (packetToSendNum == numberOfPacketsToSend) {
-            System.out.println("Good job!!!");
+           // System.out.println("Good job!!!");
         }
 
     }
@@ -210,62 +212,3 @@ public class UDPClientStreamHandler {
 
 
 }
-
-//	public void recieveUdpResultsPackets() throws IOException
-//	{
-//		boolean flag = true;
-//		int attempts = 0;
-//		int packetsCounter = 0;
-//		long neededPacket = 1;
-//
-//		while((attempts < 3) && (packetsCounter < numberOfPacketsToReceive))
-//		{
-//			attempts = 0;
-//			for (int i = 0; i < burstSize && flag; i++)
-//			{
-//				try
-//				{
-//					byte[] buffer = new byte[4122];
-//					DatagramPacket receivePacket = new DatagramPacket(buffer, buffer.length);
-//					udpSocket.receive(receivePacket);
-//					clientPort = receivePacket.getPort();
-//					clientAddress = receivePacket.getAddress();
-//					demarshaller.setStream(receivePacket.getData());
-//					if(!demarshaller.isCRCError())
-//					{
-//						if(demarshaller.getSequenceID() == neededPacket+1)
-//						{
-//							recievedParametersPackets[(int)neededPacket-1] = ByteBuffer.wrap(receivePacket.getData());
-//							packetsCounter++;
-//							neededPacket++;
-//						}
-//						else
-//							flag = false;
-//					}
-//					else
-//						flag = false;
-//				}
-//				catch (SocketTimeoutException ste)
-//				{
-//					attempts++;
-//					if (attempts == 3)
-//						flag = false;
-//				}
-//			}
-//			if(attempts != 3)
-//			{
-//				fillMarshaller(demarshaller.getTransactionID(), neededPacket);
-//				sendAck();
-//			}
-//		}
-//
-//		if (attempts == 3)
-//		{
-//			//delete the entry from the status table with TrID
-//		}
-//		else if(packetsCounter == numberOfPacketsToReceive)
-//		{
-//			//mark the result struture as has result and not completed
-//		}
-//	}
-//}

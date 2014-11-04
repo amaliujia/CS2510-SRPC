@@ -9,8 +9,8 @@ public class ClientDesegmentation
 {
     private UDPDemarshaller[] udpDemarshallers;
     private long rowSize, columnSize;
-    private double[] vector;
-    private double[][] vectorFinal;
+    private double[] vector = null;
+    private double[][] vectorFinal = null;
     public ClientDesegmentation (UDPDemarshaller[] demarshallers)
     {
         udpDemarshallers = demarshallers;

@@ -24,7 +24,7 @@ public class ClientRPCRuntime
 	private int mapperPort;
 	private String mapperIPString;
 
-	private int serverUDPPort;
+	private int serverUDPPort = 0;
 
 	public ClientRPCRuntime(String path) throws Exception
 	{
@@ -53,7 +53,7 @@ public class ClientRPCRuntime
 	public UDPDemarshaller[] dataToServer (UDPMarshaller[] udpMarshallers, int elementsToReceive, long tranID)
 			throws IOException
 	{
-		if (serverIPString != "0.0.0.0")
+		if (serverIPString != "0.0.0.0" && serverUDPPort != 0)
 		{
 			UDPClientStreamHandler udpClientStreamHandler = new UDPClientStreamHandler(serverUDPPort, serverIPString, udpMarshallers, elementsToReceive, tranID);
 			udpClientStreamHandler.sendUdpParametersPackets();
@@ -73,10 +73,10 @@ public class ClientRPCRuntime
 		{
 			try 
 			{
-				System.out.println("Connecting to Server on its port " + serverTCPPort);
+			//	System.out.println("Connecting to Server on its port " + serverTCPPort);
 
 				Socket client = new Socket(serverIPString, serverTCPPort);
-				System.out.println("Just connected to " + client.getRemoteSocketAddress());
+			//	System.out.println("Just connected to " + client.getRemoteSocketAddress());
 
 
 				//-------------------------------------------------
@@ -95,13 +95,13 @@ public class ClientRPCRuntime
 				DataInputStream in = new DataInputStream(client.getInputStream());
 
 				serverUDPPort = in.readInt();
-				System.out.println("Port is: " + serverUDPPort);
+			//	System.out.println("Port is: " + serverUDPPort);
 				client.close();
 			}
 			catch (IOException e)
 			{
 				e.printStackTrace();
-				System.out.println("Error: (In Client Side) TCP Communication lost to the server");
+				System.out.println("Error:  1. Server is busy.  OR  2.TCP Connection between server and client failed. ");
 			}
 		}
 	}
@@ -111,9 +111,9 @@ public class ClientRPCRuntime
 	{
 		try
 		{
-			System.out.println("Connecting to PortMapper on its port " + mapperPort);
+		//	System.out.println("Connecting to PortMapper on its port " + mapperPort);
 			Socket client = new Socket(mapperIPString, mapperPort);
-			System.out.println("Just connected to "+ client.getRemoteSocketAddress());
+		//	System.out.println("Just connected to "+ client.getRemoteSocketAddress());
 
 			//preparing the channel to send request
 			DataOutputStream out = new DataOutputStream(client.getOutputStream());
@@ -140,7 +140,7 @@ public class ClientRPCRuntime
 		catch(IOException e)
 		{
 			e.printStackTrace();
-			System.out.println("Error: (In Client Side) Communication lost to the port mapper");
+			System.out.println("Error: 	TCP Connection between client and port mapper failed.");
 			serverIPString = "0.0.0.0";
 			serverTCPPort = 0;
 		}
@@ -160,7 +160,7 @@ public class ClientRPCRuntime
 			serverIPString = ip1 + "." +ip2 + "." + ip3 + "." + ip4 ;
 			serverTCPPort = replyDemarshaller.getPort();
 
-			System.out.println("The corresponding IP and port acquired from the PortMapper is   " + serverIPString + ":" +serverTCPPort);
+	//		System.out.println("The corresponding IP and port acquired from the PortMapper is   " + serverIPString + ":" +serverTCPPort);
 		}
 		else if (replyDemarshaller.getType() == 0)
 		{
