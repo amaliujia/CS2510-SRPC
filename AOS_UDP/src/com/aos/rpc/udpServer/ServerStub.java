@@ -37,7 +37,7 @@ public class ServerStub extends Thread
 
 	private ServerDesegmentation desegmentation;
 	private ServerSegmentation segmentation;
-	
+
 	//the key to access the state table
 	private String stateKey;
 
@@ -56,13 +56,14 @@ public class ServerStub extends Thread
 		stateKey = "";
 	}
 
-	
-	
+
+
 	private void processNewClientRequest() throws Exception
 	{
 		MatrixResolver matRes = new MatrixResolver();
 		//crete a result structure with no results and put it in the state table
 		RequestStatus res = new RequestStatus();
+		res.setTag(stateKey);
 		addResultToStateTable(res);
 
 		double[] result = null;
@@ -119,6 +120,9 @@ public class ServerStub extends Thread
 			double[][] mat1 = matRes.getMatrixFromVector();
 			matRes.setVectorMatrix(desegmentation.getVector2(),(int) clientTcpDemarshaller.getNumberOfElements2_r(), (int)clientTcpDemarshaller.getNumberOfElements2_c());
 			double[][] mat2 = matRes.getMatrixFromVector();
+			//check for the dimensions
+			if(clientTcpDemarshaller.getNumberOfElements1_c() != clientTcpDemarshaller.getNumberOfElements2_r())
+				throw new Exception("the dimensions doesn't match");
 			//now call the procedure
 			double[][] matResult = program.multiply(mat1, mat2);
 			matRes.setMatrix(matResult);
@@ -152,8 +156,7 @@ public class ServerStub extends Thread
 			{
 				if(isRequestCompleted())
 				{
-					//drop the request by sending to the client that it is done
-					System.out.println("This shouldn't happen, and i should drop the request here");
+					//do nothing
 				}
 				else
 				{
@@ -164,7 +167,7 @@ public class ServerStub extends Thread
 			}
 			else
 			{
-				stateKeeper.remove(stateKey);
+				removeResultFromStateTable();
 				processNewClientRequest();
 			}
 		}
@@ -214,8 +217,8 @@ public class ServerStub extends Thread
 		udpHandler.sendUdpResultsPackets();
 	}
 
-	
-	
+
+
 	private void mapperRequestRecieved() throws IOException
 	{
 		//this will inspect the demarshaller module to check if the stream has been demarshaled correctly
@@ -259,8 +262,8 @@ public class ServerStub extends Thread
 
 	}
 
-	
-	
+
+
 	public void run()
 	{
 		int requestType = -1;
@@ -451,15 +454,37 @@ public class ServerStub extends Thread
 			temp.add(result);
 		}
 	}
-	
-	//reconstruct the parameters to their original form of a one dimentional vector(s)
-	private void desegmentRequest()
+
+	//remove the structure to the state table
+	private void removeResultFromStateTable()
 	{
-		desegmentation.setDemarshallers(udpHandler.getRecievedParametersPackets());
-		desegmentation.setNumberOfElements1_r(clientTcpDemarshaller.getNumberOfElements1_r());
-		desegmentation.setNumberOfElements1_c(clientTcpDemarshaller.getNumberOfElements1_c());
-		desegmentation.setNumberOfElements2_r(clientTcpDemarshaller.getNumberOfElements2_r());
-		desegmentation.setNumberOfElements2_c(clientTcpDemarshaller.getNumberOfElements2_c());
-		desegmentation.constructParameters();
+		boolean flag = true;
+		LinkedList<RequestStatus> temp = stateKeeper.get(stateKey);
+
+		if(temp != null)
+		{
+			int length = temp.size();
+			for(int i = 0; i < length && flag; i++)
+			{
+				RequestStatus tempResult = temp.get(i);
+				if(tempResult.getTag().equals(stateKey))
+				{
+					temp.remove(i);
+					flag = false;
+				}
+			}
+		}
 	}
+
+
+//reconstruct the parameters to their original form of a one dimentional vector(s)
+private void desegmentRequest()
+{
+	desegmentation.setDemarshallers(udpHandler.getRecievedParametersPackets());
+	desegmentation.setNumberOfElements1_r(clientTcpDemarshaller.getNumberOfElements1_r());
+	desegmentation.setNumberOfElements1_c(clientTcpDemarshaller.getNumberOfElements1_c());
+	desegmentation.setNumberOfElements2_r(clientTcpDemarshaller.getNumberOfElements2_r());
+	desegmentation.setNumberOfElements2_c(clientTcpDemarshaller.getNumberOfElements2_c());
+	desegmentation.constructParameters();
+}
 }

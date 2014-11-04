@@ -40,7 +40,7 @@ public class UDPClientStreamHandler {
         numberOfPacketsToSend = udpMarshallers.length;
 
         udpClientSocket = new DatagramSocket(0);
-        udpClientSocket.setSoTimeout(30000);
+        udpClientSocket.setSoTimeout(10000);
 
 
         //Initialize packets to receive
@@ -83,6 +83,13 @@ public class UDPClientStreamHandler {
                     {
                         if (demarshaller.getSequenceID() == neededPacket)
                         {
+                        	if (demarshaller.getSequenceID() == 1 && demarshaller.getType() == 0)
+                        	{
+                        		sendAck(neededPacket+1);
+                                recievedResultPackets[(int) neededPacket - 1] = demarshaller;
+
+                        		return;
+                        	}
                             recievedResultPackets[(int) neededPacket - 1] = demarshaller;
                             demarshaller = new UDPDemarshaller();
                             attempts = 0;
@@ -109,7 +116,10 @@ public class UDPClientStreamHandler {
         {
             //delete the entry from the status table with TrID (give up the request)
             System.out.println("Error: Time out when receiving the result from server!!!");
-            recievedResultPackets = null;
+            if (recievedResultPackets[0] == null )
+            	recievedResultPackets = null;
+            //else if (recievedResultPackets[0].getType() == 0)
+            	 
         }
         else if (neededPacket == numberOfPacketsToReceive)
         {

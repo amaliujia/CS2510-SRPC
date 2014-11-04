@@ -169,11 +169,8 @@ public class UDPServerStreamHandler
 		if (attempts == 3)
 		{
 			stateKeeper.remove(demarshaller.getTransactionID());
+			System.out.println("exceeded the attempts to recieve");
 			//delete the entry from the status table with TrID (give up the request)
-		}
-		else if(neededPacket == numberOfPacketsToReceive)
-		{
-			System.out.println("Good Job!!! yes I'm complementing myself!!!");
 		}
 	}
 

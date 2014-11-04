@@ -32,6 +32,7 @@ public class ServerSegmentation
 			udpMarshallers[0].setType((short)0);
 			udpMarshallers[0].setVectorSize(0);
 			udpMarshallers[0].setVector(null);
+			udpMarshallers[0].formStream();
 		}
 		else
 		{
