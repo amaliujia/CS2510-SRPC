@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.zip.CRC32;
 
-import com.aos.rpc.helperClasses.ParametersConstructor;
+import com.aos.rpc.helperClasses.ServerDesegmentation;
 
 public class Testing {
 

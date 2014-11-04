@@ -2,35 +2,25 @@ package com.aos.rpc.helperClasses;
 
 public class RequestStatus
 {
-	private double[] result1;
-	private double[] result2;
-	private long elements1_r;
-	private long elements1_c;
-	private long elements2_r;
-	private long elements2_c;
-	private boolean hasResult;
-	private boolean completed;
+	private double[] result;
+	private long elements1_r, elements1_c;
+	private long elements2_r, elements2_c;
+	private boolean hasResult, completed;
+	private String tag;
 	
 	public RequestStatus()
 	{
+		tag = "";
 		hasResult = false;
 		completed = false;
 	}
 
-	public double[] getResult1() {
-		return result1;
+	public double[] getResult() {
+		return result;
 	}
 
-	public void setResult1(double[] result1) {
-		this.result1 = result1;
-	}
-
-	public double[] getResult2() {
-		return result2;
-	}
-
-	public void setResult2(double[] result2) {
-		this.result2 = result2;
+	public void setResult(double[] result) {
+		this.result = result;
 	}
 
 	public long getElements1_r() {
@@ -64,7 +54,14 @@ public class RequestStatus
 	public void setElements2_c(long elements2_c) {
 		this.elements2_c = elements2_c;
 	}
+	
+	public String getTag() {
+		return tag;
+	}
 
+	public void setTag(String tag) {
+		this.tag = tag;
+	}
 
 	public boolean isHasResult() {
 		return hasResult;
@@ -81,6 +78,4 @@ public class RequestStatus
 	public void setCompleted(boolean completed) {
 		this.completed = completed;
 	}
-	
-	
 }
