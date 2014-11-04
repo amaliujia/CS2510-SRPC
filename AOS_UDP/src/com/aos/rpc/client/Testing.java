@@ -12,7 +12,7 @@ public class Testing
 	{
 		double[] onedim = new double[10];
 		double[][] twodim1 = new double[1200][1200];
-		double[][] twodim2 = new double[1200][1200];
+		double[][] twodim2 = new double[1201][1200];
 		
 		//double[][] twodim1 = new double[2][3];
 		//double[][] twodim2 = new double[3][2];

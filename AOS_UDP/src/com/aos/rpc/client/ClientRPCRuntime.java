@@ -102,6 +102,7 @@ public class ClientRPCRuntime
 			{
 				e.printStackTrace();
 				System.out.println("Error:  1. Server is busy.  OR  2.TCP Connection between server and client failed. ");
+				serverUDPPort = 0;
 			}
 		}
 	}
@@ -140,7 +141,7 @@ public class ClientRPCRuntime
 		catch(IOException e)
 		{
 			e.printStackTrace();
-			System.out.println("Error: 	TCP Connection between client and port mapper failed.");
+			System.out.println("Error: 	1.TCP Connection between client and port mapper failed. OR 2. No port mapper available.");
 			serverIPString = "0.0.0.0";
 			serverTCPPort = 0;
 		}
