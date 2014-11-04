@@ -1,12 +1,9 @@
 package com.aos.rpc.helperClasses;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
 import com.aos.rpc.dataMarshalling.UDPDemarshaller;
-import com.aos.rpc.dataMarshalling.UDPMarshaller;
 
-public class ParametersConstructor
+public class ServerDesegmentation
 {
 	private UDPDemarshaller[] demarshallers;
 	private long numberOfElements1_r;	
@@ -18,7 +15,7 @@ public class ParametersConstructor
 	private boolean parametersReady;
 	private int numberOfVectors;
 	
-	public ParametersConstructor()
+	public ServerDesegmentation()
 	{		
 		demarshallers = null;
 		vector1 = vector2 = null;

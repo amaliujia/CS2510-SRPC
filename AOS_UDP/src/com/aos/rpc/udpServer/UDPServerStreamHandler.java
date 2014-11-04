@@ -6,9 +6,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.nio.ByteBuffer;
+import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.aos.rpc.dataMarshalling.UDPDemarshaller;
@@ -17,21 +16,18 @@ import com.aos.rpc.helperClasses.RequestStatus;
 
 public class UDPServerStreamHandler
 {
-	private int clientPort;
+	private int clientPort, burstSize;
+	private long numberOfPacketsToReceive, numberOfPacketsToSend, transactionID;
 	private InetAddress clientAddress; 
-	private int burstSize;
 	private Socket tcpConnection;
+	private DatagramSocket udpSocket;
 	private UDPDemarshaller demarshaller;
 	private UDPMarshaller marshaller;
 	private UDPDemarshaller[] recievedParametersPackets;
 	private UDPMarshaller[] toSendResultsPackets;
-	private long numberOfPacketsToReceive;
-	private long numberOfPacketsToSend;
-	private DatagramSocket udpSocket;
-	private ConcurrentHashMap<String, RequestStatus> stateKeeper;
-	private long TrID;
+	private ConcurrentHashMap<String, LinkedList<RequestStatus>> stateKeeper;
 
-	public UDPServerStreamHandler(Socket tcpConnection, ConcurrentHashMap<String, RequestStatus> stateKeeper) throws IOException
+	public UDPServerStreamHandler(Socket tcpConnection, ConcurrentHashMap<String, LinkedList<RequestStatus>> stateKeeper) throws IOException
 	{
 		this.tcpConnection = tcpConnection;
 		demarshaller = new UDPDemarshaller();
@@ -46,7 +42,6 @@ public class UDPServerStreamHandler
 	private void sendPortAndCloseTCP() throws IOException
 	{
 		DataOutputStream out = new DataOutputStream(tcpConnection.getOutputStream());
-		//sending the pot
 		out.writeInt(udpSocket.getLocalPort());
         System.out.println("port is:" + udpSocket.getLocalPort());
 		out.flush();
@@ -55,7 +50,7 @@ public class UDPServerStreamHandler
 	
 	private void sendAck(long neededPacket) throws IOException
 	{
-		marshaller.setTransactionID(TrID);
+		marshaller.setTransactionID(transactionID);
 		marshaller.setSequenceID(neededPacket);
 		marshaller.setVectorSize(0);
 		marshaller.setType((short)2);
@@ -109,21 +104,19 @@ public class UDPServerStreamHandler
 			}
 			catch (SocketTimeoutException ste)
 			{
+				//timeout occured
 				attempts++;
 				if (attempts == 3)
 					flag = false;
 			}
 		}
 
+		//we reached the maximum number of tries to re-connect
 		if (attempts == 3)
 		{
-			//give up and issue a new request
-            System.out.println("Give up!!!");
+			//give up and wait for client to ask for the results in another request
+            System.out.println("Error: lost connection with the client");
         }
-		else if(packetToSendNum == numberOfPacketsToSend)
-		{
-			System.out.println("Good job!!!");
-		}
 	}
 
 	public void recieveUdpParametersPackets() throws IOException
@@ -206,9 +199,8 @@ public class UDPServerStreamHandler
 		this.numberOfPacketsToSend = numberOfPacketsToSend;
 	}
 
-	public void setTrID(long TrID)
+	public void setTransactionID(long transactionID)
 	{
-		this.TrID = TrID;
+		this.transactionID = transactionID;
 	}
-	
 }

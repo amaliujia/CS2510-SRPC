@@ -4,21 +4,22 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.aos.rpc.dataMarshalling.TCPMapperRequestMarshaller;
 import com.aos.rpc.helperClasses.RequestStatus;
 
 public class ServerRunTime
 {
-	private ConcurrentHashMap<String, RequestStatus> stateKeeper;
+	private ConcurrentHashMap<String, LinkedList<RequestStatus>> stateKeeper;
 	private ServerSocket serverSocket;
+	//keep track of the worker threads as a max of 10 threads
 	private ServerStub[] workers;
 	private PortMapperHandler portMapper;
 
 	ServerRunTime(String path) throws Exception
 	{
-		stateKeeper = new ConcurrentHashMap<String, RequestStatus>();
+		stateKeeper = new ConcurrentHashMap<String, LinkedList<RequestStatus>>();
 		serverSocket = new ServerSocket(0);
 		serverSocket.setReceiveBufferSize(5);
 		workers = new ServerStub[10];
@@ -28,9 +29,18 @@ public class ServerRunTime
 
 	public void run() throws InterruptedException, IOException
 	{
-		portMapper.registerAtPortMapper();
+		boolean mapperIsUp = true;
+		try
+		{
+			portMapper.registerAtPortMapper();
+		}
+		catch(IOException e)
+		{
+			System.out.println("Error: connection with port mapper is lost, server cannot register the services");
+			mapperIsUp = false;
+		}
 		boolean flag = true;
-		while(true)
+		while(true && mapperIsUp)
 		{
 			Socket tcpConnection = null;
 			try 
@@ -56,17 +66,14 @@ public class ServerRunTime
 					}
 				}
 				if(flag)
-				{
-					
-					System.out.println("Server busy");
+				{	
+					System.out.println("Warning: server is getting busy, a connection has been dropped");
 					tcpConnection.close();
-					//fetch the request and dump it and reply with
-					//error server busy message and close conn.
 				}
 			} 
 			catch (IOException e)
 			{
-				e.printStackTrace();
+				System.out.println("Error: connection error, cannot accept connections");
 			}
 		}
 	}

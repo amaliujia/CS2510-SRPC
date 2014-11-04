@@ -3,9 +3,6 @@ package com.aos.rpc.helperClasses;
 
 import com.aos.rpc.dataMarshalling.UDPMarshaller;
 
-/**
- * Created by zhangchi on Oct/28/14.
- */
 public class ServerSegmentation
 {
 	private double[] vector1, vector2;

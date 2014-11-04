@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 
 import com.aos.rpc.dataMarshalling.TCPMapperReplyDemarshaller;
 import com.aos.rpc.dataMarshalling.TCPMapperRequestMarshaller;
@@ -27,7 +29,7 @@ public class PortMapperHandler
 	private TCPMapperRequestMarshaller marshal;
 	private TCPMapperReplyDemarshaller demarshal;
 
-	
+
 	public PortMapperHandler(String mapperPath, String serverIp, int serverPort) throws Exception
 	{
 		portMapperPath = mapperPath;
@@ -39,13 +41,12 @@ public class PortMapperHandler
 		fillServerIp(serverIp);
 		fillMapperIp(mapperPath);
 	}
-	
+
 	private void fillMapperIp(String path) throws Exception
 	{
 		String line = "";
 		File file = new File(path);
 		//change it to the afs path
-
 		// if file doesnt exists, then create it
 		if (!file.exists())
 			throw new Exception("file openning problem");
@@ -57,43 +58,43 @@ public class PortMapperHandler
 		mapperIp = ipandport[0];
 		mapperPort = Integer.valueOf(ipandport[1]);
 	}
-	
+
 	private void fillServerIp(String serverIp)
 	{
 		String[] ipAddress = serverIp.split("\\.");
 		for(int i = 0; i < ip.length; i++)
 			ip[i] = Integer.parseInt(ipAddress[i]);
 	}
-	
+
 	private void communicate(byte[] stream) throws IOException
 	{
-		Socket mapper = new Socket(mapperIp, mapperPort);    
-        OutputStream outToMapper = mapper.getOutputStream();
-        DataOutputStream out = new DataOutputStream(outToMapper);
-        
-        //sending
-        out.writeInt(stream.length);
-        out.write(stream);
-        out.flush();
-        
-        InputStream inFromMapper = mapper.getInputStream();
-        DataInputStream in = new DataInputStream(inFromMapper);
-        
-        //getting the reply message (blocking for reply)
-        int replySize = in.readInt();
-        byte[] reply = new byte[replySize];
-        for (int i = 0; i < replySize; i++)
-        	reply[i] = (byte) in.read();
-        
-        //formatting the reply to String (unmarshalling)
-        demarshal.setStream(reply);
-        mapper.close();
+			Socket mapper = new Socket(mapperIp, mapperPort);    
+			OutputStream outToMapper = mapper.getOutputStream();
+			DataOutputStream out = new DataOutputStream(outToMapper);
+
+			//sending
+			out.writeInt(stream.length);
+			out.write(stream);
+			out.flush();
+
+			InputStream inFromMapper = mapper.getInputStream();
+			DataInputStream in = new DataInputStream(inFromMapper);
+
+			//getting the reply message (blocking for reply)
+			int replySize = in.readInt();
+			byte[] reply = new byte[replySize];
+			for (int i = 0; i < replySize; i++)
+				reply[i] = (byte) in.read();
+
+			//formatting the reply to String (unmarshalling)
+			demarshal.setStream(reply);
+			mapper.close();
 	}
-	
+
 	public boolean registerAtPortMapper() throws IOException
 	{
 		boolean result = true;
-		
+
 		int[] procedureNumbers = program.getProcedureNumbers();
 		for(int i = 0; i < procedureNumbers.length && result; i++)
 		{

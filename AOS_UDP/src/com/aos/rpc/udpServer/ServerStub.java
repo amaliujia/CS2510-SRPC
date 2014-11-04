@@ -7,48 +7,41 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.aos.rpc.dataMarshalling.TCPMapperReplyMarshaller;
 import com.aos.rpc.dataMarshalling.TCPMapperRequestDemarshaller;
-import com.aos.rpc.dataMarshalling.TCPReplyMarshaller;
 import com.aos.rpc.dataMarshalling.TCPRequestDemarshaller;
 import com.aos.rpc.dataMarshalling.UDPMarshaller;
 import com.aos.rpc.helperClasses.MatrixResolver;
-import com.aos.rpc.helperClasses.ParametersConstructor;
+import com.aos.rpc.helperClasses.ServerDesegmentation;
 import com.aos.rpc.helperClasses.RequestStatus;
 import com.aos.rpc.helperClasses.ServerSegmentation;
 
-/*
- * - get the TCP socket
- * - end the communication
- * - establish a udp
- * - check the errors (CRC, out of order, ...)
- * - agree with the client on everything
- * - define a UDP socket
- * - send the port to the client
- * - wait to accept it
- * - start from there the demarshaling
- * - execute
- * - return results
- */
-
 public class ServerStub extends Thread
 {
-	private ConcurrentHashMap<String, RequestStatus> stateKeeper;
+	private ConcurrentHashMap<String, LinkedList<RequestStatus>> stateKeeper;
 	private ProgramLibrary program;
+
+	//the TCP socket connection gotten from the RPCServerRuntime
 	private Socket socket;
+
 	private TCPRequestDemarshaller clientTcpDemarshaller;
 	private TCPMapperRequestDemarshaller mapperDemarshaller;
 	private TCPMapperReplyMarshaller mapperMarshaller;
-
-	private UDPServerStreamHandler udpHandler;
 	private UDPMarshaller clientMarshaller;
 
-	private ParametersConstructor parameters;
-	private ServerSegmentation segmentation;
+	//handles the communication between the client the server using UDP
+	private UDPServerStreamHandler udpHandler;
 
-	public ServerStub(ConcurrentHashMap<String, RequestStatus> stateKeeper, Socket socket) throws IOException
+	private ServerDesegmentation desegmentation;
+	private ServerSegmentation segmentation;
+	
+	//the key to access the state table
+	private String stateKey;
+
+	public ServerStub(ConcurrentHashMap<String, LinkedList<RequestStatus>> stateKeeper, Socket socket) throws IOException
 	{
 		this.stateKeeper = stateKeeper;
 		this.socket = socket;
@@ -58,104 +51,106 @@ public class ServerStub extends Thread
 		clientMarshaller = null;
 		mapperMarshaller = null;
 		udpHandler = null;
-		parameters = new ParametersConstructor();
+		desegmentation = new ServerDesegmentation();
 		segmentation = null;
-	}
-	
-	private void showTheRecievedParameters()
-	{
-		double[] param1 = parameters.getVector1();
-		double[] param2 = parameters.getVector2();
-		for(int i = 0; i < param1.length; i++)
-			System.out.println(param1[i]);
-		
-		for(int i = 0; i < param1.length; i++)
-			System.out.println(param2[i]);
+		stateKey = "";
 	}
 
-	private void processNewRequest(String key) throws Exception
+	
+	
+	private void processNewClientRequest() throws Exception
 	{
 		MatrixResolver matRes = new MatrixResolver();
+		//crete a result structure with no results and put it in the state table
 		RequestStatus res = new RequestStatus();
-		stateKeeper.put(key, res);
-		
-		parameters.setDemarshallers(udpHandler.getRecievedParametersPackets());
-		parameters.setNumberOfElements1_r(clientTcpDemarshaller.getNumberOfElements1_r());
-		parameters.setNumberOfElements1_c(clientTcpDemarshaller.getNumberOfElements1_c());
-		parameters.setNumberOfElements2_r(clientTcpDemarshaller.getNumberOfElements2_r());
-		parameters.setNumberOfElements2_c(clientTcpDemarshaller.getNumberOfElements2_c());
-		parameters.constructParameters();
-		
-		//showTheRecievedParameters();
-		
-		double[] result1 = null;
-		double[] result2 = null;
+		addResultToStateTable(res);
+
+		double[] result = null;
 
 		long procedure = clientTcpDemarshaller.getProcedureNumber();
 		switch((int)procedure)
 		{
+		//for the min procedure
 		case 1:			
-			result1 = new double[1];
-			result1[0] = program.min(parameters.getVector1());
-			segmentation = new ServerSegmentation(result1, null, clientTcpDemarshaller.getTransactionID());
+			//only one double (the minimum)
+			result = new double[1];
+			//call the procedure
+			result[0] = program.min(desegmentation.getVector1());
+			//form the reply 
+			segmentation = new ServerSegmentation(result, null, clientTcpDemarshaller.getTransactionID());
+			//fill the result structure for the status
 			res.setElements1_r(1);
-			res.setElements1_c(1);;
+			res.setElements1_c(1);
 			res.setElements2_r(0);
 			res.setElements2_c(0);
-			res.setResult1(result1);
+			res.setResult(result);
 			break;
 		case 2:
-			result1 = new double[1];
-			result1[0] = program.max(parameters.getVector1());
-			segmentation = new ServerSegmentation(result1, null, clientTcpDemarshaller.getTransactionID());
+			//only one double (the maximum)
+			result = new double[1];
+			//call the procedure
+			result[0] = program.max(desegmentation.getVector1());
+			//form the reply 
+			segmentation = new ServerSegmentation(result, null, clientTcpDemarshaller.getTransactionID());
+			//fill the result structure for the status
 			res.setElements1_r(1);
 			res.setElements1_c(1);;
 			res.setElements2_r(0);
 			res.setElements2_c(0);
-			res.setResult1(result1);
+			res.setResult(result);
 			break;
 		case 3:
-			result1 = new double[parameters.getVector1().length];
-			result1 = program.sort(parameters.getVector1());
-			segmentation = new ServerSegmentation(result1, null, clientTcpDemarshaller.getTransactionID());
+			//sorted vector
+			result = new double[desegmentation.getVector1().length];
+			//call the procedure
+			result = program.sort(desegmentation.getVector1());
+			//form the reply 
+			segmentation = new ServerSegmentation(result, null, clientTcpDemarshaller.getTransactionID());
+			//fill the result structure for the status
 			res.setElements1_r(1);
-			res.setElements1_c(result1.length);
+			res.setElements1_c(result.length);
 			res.setElements2_r(0);
 			res.setElements2_c(0);
-			res.setResult1(result1);
+			res.setResult(result);
 			break;
 		case 4:
-			matRes.setVectorMatrix(parameters.getVector1(),(int) clientTcpDemarshaller.getNumberOfElements1_r(), (int)clientTcpDemarshaller.getNumberOfElements1_c());
+			//form the matrix from the two vectors (two 1-dim vectors) from the request
+			matRes.setVectorMatrix(desegmentation.getVector1(),(int) clientTcpDemarshaller.getNumberOfElements1_r(), (int)clientTcpDemarshaller.getNumberOfElements1_c());
 			double[][] mat1 = matRes.getMatrixFromVector();
-			matRes.setVectorMatrix(parameters.getVector2(),(int) clientTcpDemarshaller.getNumberOfElements2_r(), (int)clientTcpDemarshaller.getNumberOfElements2_c());
+			matRes.setVectorMatrix(desegmentation.getVector2(),(int) clientTcpDemarshaller.getNumberOfElements2_r(), (int)clientTcpDemarshaller.getNumberOfElements2_c());
 			double[][] mat2 = matRes.getMatrixFromVector();
+			//now call the procedure
 			double[][] matResult = program.multiply(mat1, mat2);
 			matRes.setMatrix(matResult);
-			result1 = matRes.getVectorFromMatrix();
-			segmentation = new ServerSegmentation(result1, null, clientTcpDemarshaller.getTransactionID());
+			//get the vector from the result matrix
+			result = matRes.getVectorFromMatrix();
+			//segment it to pass it to the 
+			segmentation = new ServerSegmentation(result, null, clientTcpDemarshaller.getTransactionID());
 			res.setElements1_r(1);
-			res.setElements1_c(result1.length);
+			res.setElements1_c(result.length);
 			res.setElements2_r(0);
 			res.setElements2_c(0);
-			res.setResult1(result1);
+			res.setResult(result);
 			break;
 		default:
 			//something
 			break;
 		}
+		//set the status as "result is calculated but not sent yet"
 		res.setHasResult(true);
-		stateKeeper.put(key, res);
+		addResultToStateTable(res);
 	}
 
 	private void handleClientRequest() throws Exception
 	{
-		String key = getKey(clientTcpDemarshaller.getTransactionID());
+		desegmentRequest();
+		constructStateKey();		
 
-		if(transactionIDExists(key))
+		if(doesRequestHasState())
 		{
-			if(resultExists(key))
+			if(resultExists())
 			{
-				if(isRequestCompleted(key))
+				if(isRequestCompleted())
 				{
 					//drop the request by sending to the client that it is done
 					System.out.println("This shouldn't happen, and i should drop the request here");
@@ -163,32 +158,37 @@ public class ServerStub extends Thread
 				else
 				{
 					//resend the result by filling the marshaller and give it to the communicator
-					RequestStatus res = stateKeeper.get(key);
-					segmentation = new ServerSegmentation(res.getResult1(), null, clientTcpDemarshaller.getTransactionID());
+					RequestStatus res = getResultFromStateTable();
+					segmentation = new ServerSegmentation(res.getResult(), null, clientTcpDemarshaller.getTransactionID());
 				}
 			}
 			else
 			{
-				stateKeeper.remove(key);
-				processNewRequest(key);
+				stateKeeper.remove(stateKey);
+				processNewClientRequest();
 			}
 		}
 		else
-			processNewRequest(key);
+			processNewClientRequest();
 	}
 
 	private void clientRequestRecieved() throws IOException
 	{
+		//this will inspect the demarshaller module to check if the stream has been demarshaled correctly
 		if(clientTcpDemarshaller.isRequestReady())
 		{
+			//this will not result in CRC error since we are using TCP here, but good to have for future change
 			if(!clientTcpDemarshaller.isCRCError())
 			{
+				//check if I have the requested procedure
 				if(isCallSupported(clientTcpDemarshaller.getProgramNumber(), clientTcpDemarshaller.getProgramVersion(), 
 						clientTcpDemarshaller.getProcedureNumber()))
 				{
 					try
 					{
-						udpHandler.setTrID(clientTcpDemarshaller.getTransactionID());
+						//fill the udp handler with the recieved request information from TCP and then
+						// continue fetching the parameters through the UDP handler
+						udpHandler.setTransactionID(clientTcpDemarshaller.getTransactionID());//set the transactionID
 						udpHandler.setTcpConnection(socket);
 						udpHandler.setNumberOfPacketsToReceive(clientTcpDemarshaller.getNumOfPackets());
 						udpHandler.recieveUdpParametersPackets();
@@ -196,14 +196,16 @@ public class ServerStub extends Thread
 					}
 					catch(Exception e)
 					{
-						//here system error
+						//form an error response
 						segmentation = new ServerSegmentation(null, null, clientTcpDemarshaller.getTransactionID());
 					}
 				}
 				else
+					//form an error response
 					segmentation = new ServerSegmentation(null, null, clientTcpDemarshaller.getTransactionID());
 			}
 			else
+				//form an error response
 				segmentation = new ServerSegmentation(null, null, clientTcpDemarshaller.getTransactionID());
 		}
 		segmentation.processingSegmentation();
@@ -212,6 +214,53 @@ public class ServerStub extends Thread
 		udpHandler.sendUdpResultsPackets();
 	}
 
+	
+	
+	private void mapperRequestRecieved() throws IOException
+	{
+		//this will inspect the demarshaller module to check if the stream has been demarshaled correctly
+		if(mapperDemarshaller.isRequestReady())
+		{
+			//this will not result in CRC error since we are using TCP here, but good to have for future change
+			if(!mapperDemarshaller.isCRCError())
+			{
+				try
+				{
+					//check if the request is  re-register request from the port mapper
+					if (mapperDemarshaller.getRequestType() == 2)
+					{
+						mapperMarshaller.setType((short)2);
+						mapperMarshaller.setReplyType((short)2);
+						//fill the result with "yes I'm alive"
+						mapperMarshaller.setResult((short)1);
+					}
+				}
+				catch(Exception e)
+				{
+					//set an error here
+					mapperMarshaller.setType((short)0);
+				}
+			}
+			else					
+				//set an error here
+				mapperMarshaller.setType((short)0);
+		}
+		else
+			//set an error here
+			mapperMarshaller.setType((short)0);
+
+		//reply to the mapper with the result here and close the socket
+		DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+		mapperMarshaller.formStream();
+		out.writeInt(mapperMarshaller.getStream().length);
+		out.write(mapperMarshaller.getStream());
+		out.flush();
+		socket.close();
+
+	}
+
+	
+	
 	public void run()
 	{
 		int requestType = -1;
@@ -227,13 +276,14 @@ public class ServerStub extends Thread
 
 			requestType = clientOrMapperRequest(request);
 
+			//1: the rquest is coming from a client, hence, prepare to recieve
 			if(requestType == 1)
 			{
 				clientTcpDemarshaller = new TCPRequestDemarshaller();
 				clientTcpDemarshaller.setStream(request);
 				clientMarshaller = new UDPMarshaller();
 			}
-			else
+			else//the request is coming from a mapper for a re-register, hence, prepare to receive
 			{
 				mapperDemarshaller = new TCPMapperRequestDemarshaller();
 				mapperDemarshaller.setStream(request);
@@ -241,18 +291,22 @@ public class ServerStub extends Thread
 			}
 
 
+			//handle the request from the client
 			if(clientTcpDemarshaller != null)
 			{
+				//push the communication handling to this module and further handle it
 				udpHandler = new UDPServerStreamHandler(socket, stateKeeper);
 				clientRequestRecieved();
-				//update state table
+
+				//if the response has no errors, update state table by stating that the request is fully served
 				if(clientMarshaller.getType() != 0)
 				{
-					RequestStatus res = stateKeeper.get(getKey(clientTcpDemarshaller.getTransactionID()));
+					RequestStatus res = getResultFromStateTable();
 					res.setCompleted(true);
-					stateKeeper.put(getKey(clientTcpDemarshaller.getTransactionID()), res);
+					addResultToStateTable(res);
 				}
 			}
+			//handle the refresh request (i.e. re-register) from the port mapper
 			else
 				mapperRequestRecieved();
 		}
@@ -266,6 +320,7 @@ public class ServerStub extends Thread
 		}
 	}
 
+	//does the server support the program number, version, and procedure version
 	private boolean isCallSupported(long prgNum, long progVer, long prcNum)
 	{
 		boolean result = false;
@@ -277,60 +332,77 @@ public class ServerStub extends Thread
 		return result;
 	}
 
-	private String getKey(long trID)
+	//form the key for the state table from the IP address and the transactionID
+	private void constructStateKey()
 	{
-		String result = null;
+		double[] vector1 = desegmentation.getVector1();
+		double[] vector2 = desegmentation.getVector2();
+		double parameterFirst, parameterLast, parameterMiddle;
 
-		result = String.valueOf(socket.getInetAddress().getHostAddress()) + "," + 
-				String.valueOf(socket.getPort()) + "," + String.valueOf(trID);
+		//only one vector (non matrix parameter)
+		if(vector2 == null)
+		{
+			parameterFirst = vector1[0];
+			parameterLast = vector1[vector1.length-1];
+			parameterMiddle = vector1[vector1.length/2];
+		}
+		else
+		{
+			parameterFirst = vector1[0];
+			parameterLast = vector2[vector2.length-1];
 
-		return result;
+			int middlePosition = ((vector1.length + vector2.length) / 2);
+			if(middlePosition > vector1.length)
+			{
+				middlePosition = vector2.length - middlePosition;
+				parameterMiddle = vector2[middlePosition - 1];
+			}
+			else
+				parameterMiddle = vector1[middlePosition - 1];
+		}
+
+		stateKey = String.valueOf(socket.getInetAddress().getHostAddress()) + "," + 
+				String.valueOf(clientTcpDemarshaller.getTransactionID()) + "," +
+				String.valueOf(clientTcpDemarshaller.getProcedureNumber()) + 
+				String.valueOf(parameterFirst) + String.valueOf(parameterLast) +
+				String.valueOf(parameterMiddle);
 	}
 
-	private boolean transactionIDExists(String key)
+	//check if the Request has been seen before
+	private boolean doesRequestHasState()
 	{
 		boolean result = false;
+		RequestStatus temp = getResultFromStateTable();
 
-		if(stateKeeper.containsKey(key))
+		if(temp != null)
 			result = true;
 
-		return result;
-	}
+		return result;	}
 
-	private boolean resultExists(String key)
+	//checks in the status table if the request is recieved
+	private boolean resultExists()
 	{
 		boolean result = false;
-		RequestStatus value = stateKeeper.get(key);
+		RequestStatus temp = getResultFromStateTable();
 
-		if(stateKeeper.get(key) != null)
-			result = value.isHasResult();
+		if(temp != null)
+			result = temp.isHasResult();
 
-		return result;
-	}
+		return result;	}
 
-	private boolean isRequestCompleted(String key)
+	//means result calculated and sent and recieved by the client
+	private boolean isRequestCompleted()
 	{
 		boolean result = false;
-		RequestStatus value = stateKeeper.get(key);
+		RequestStatus temp = getResultFromStateTable();
 
-		if(stateKeeper.get(key) != null)
-			result = value.isCompleted();
+		if(temp != null)
+			result = temp.isCompleted();
 
 		return result;
 	}
-	
-	private void handleMapperRequest()
-	{	
-        if(!mapperDemarshaller.isCRCError())
-        {
-            if (mapperDemarshaller.getRequestType() == 2)
-            {
-            	mapperMarshaller.setReplyType((short)2);
-                mapperMarshaller.setResult((short)1);
-            }
-        }
-	}
 
+	//get the first "short type" value of the stream and determine the type of the request
 	private int clientOrMapperRequest(byte[] stream)
 	{
 		int result = -1;
@@ -343,38 +415,51 @@ public class ServerStub extends Thread
 		return result;
 	}
 
-	private void mapperRequestRecieved() throws IOException
+	//returns the RequestResult from the state table or null if it doesn't exist
+	private RequestStatus getResultFromStateTable()
 	{
-		if(mapperDemarshaller.isRequestReady())
+		RequestStatus result = null;
+		LinkedList<RequestStatus> temp = stateKeeper.get(stateKey);
+
+		if(temp != null)
 		{
-			if(!mapperDemarshaller.isCRCError())
+			int length = temp.size();
+			for(int i = 0; i < length; i++)
 			{
-				try
-				{
-					mapperMarshaller.setType((short)2);
-					handleMapperRequest();
-				}
-				catch(Exception e)
-				{
-					//here system error
-					mapperMarshaller.setType((short)0);
-				}
+				RequestStatus tempResult = temp.get(i);
+				if(tempResult.getTag().equals(stateKey))
+					result = tempResult;
 			}
-			else
-				mapperMarshaller.setType((short)0);
 		}
-		else
-			mapperMarshaller.setType((short)0);
-		
-		DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-		mapperMarshaller.formStream();
 
-		//sending reply
-		out.writeInt(mapperMarshaller.getStream().length);
-		out.write(mapperMarshaller.getStream());
-		out.flush();
-		socket.close();
-
+		return result;
 	}
 
+	//add the structure to the state table
+	private void addResultToStateTable(RequestStatus result)
+	{
+		LinkedList<RequestStatus> temp = stateKeeper.get(stateKey);
+
+		if(temp == null)
+		{
+			temp = new LinkedList<RequestStatus>();
+			temp.add(result);
+			stateKeeper.put(stateKey, temp);
+		}
+		else
+		{
+			temp.add(result);
+		}
+	}
+	
+	//reconstruct the parameters to their original form of a one dimentional vector(s)
+	private void desegmentRequest()
+	{
+		desegmentation.setDemarshallers(udpHandler.getRecievedParametersPackets());
+		desegmentation.setNumberOfElements1_r(clientTcpDemarshaller.getNumberOfElements1_r());
+		desegmentation.setNumberOfElements1_c(clientTcpDemarshaller.getNumberOfElements1_c());
+		desegmentation.setNumberOfElements2_r(clientTcpDemarshaller.getNumberOfElements2_r());
+		desegmentation.setNumberOfElements2_c(clientTcpDemarshaller.getNumberOfElements2_c());
+		desegmentation.constructParameters();
+	}
 }

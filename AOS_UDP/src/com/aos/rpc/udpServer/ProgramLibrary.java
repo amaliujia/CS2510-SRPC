@@ -121,42 +121,14 @@ public class ProgramLibrary
 	public int getProgramNumber() {
 		return programNumber;
 	}
-//
-//	public void setProgramNumber(int programNumber) {
-//		this.programNumber = programNumber;
-//	}
-//
+
 	public int getProgramVersion() {
 		return programVersion;
 	}
-//
-//	public void setProgramVersion(int programVersion) {
-//		this.programVersion = programVersion;
-//	}
-//
+
 	public int[] getProcedureNumbers() {
 		return procedureNumbers;
 	}
-//
-//	public void setProcedureNumbers(int[] procedureNumbers) {
-//		this.procedureNumbers = procedureNumbers;
-//	}
-//
-//	public int[] getProcedureVersions() {
-//		return procedureVersions;
-//	}
-//
-//	public void setProcedureVersions(int[] procedureVersions) {
-//		this.procedureVersions = procedureVersions;
-//	}
-//
-//	public int getNumberOfProcedures() {
-//		return numberOfProcedures;
-//	}
-//
-//	public void setNumberOfProcedures(int numberOfProcedures) {
-//		this.numberOfProcedures = numberOfProcedures;
-//	}
 	
 	public boolean isProgramNumberSupported(long programNumber)
 	{
@@ -186,6 +158,4 @@ public class ProgramLibrary
 		
 		return result;
 	}
-
-
 }
