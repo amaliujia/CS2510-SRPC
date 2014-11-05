@@ -157,16 +157,16 @@ public class ServerStub extends Thread
 		{
 			if(resultExists())
 			{
-				if(isRequestCompleted())
-				{
-					//do nothing
-				}
-				else
-				{
+//				if(isRequestCompleted())
+//				{
+//					//do nothing
+//				}
+//				else
+//				{
 					//resend the result by filling the marshaller and give it to the communicator
 					RequestStatus res = getResultFromStateTable();
 					segmentation = new ServerSegmentation(res.getResult(), null, clientTcpUnmarshaller.getTransactionID());
-				}
+//				}
 			}
 			else
 			{
