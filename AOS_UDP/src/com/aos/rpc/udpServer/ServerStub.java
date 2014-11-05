@@ -75,7 +75,7 @@ public class ServerStub extends Thread
 			result = new double[1];
 			//call the procedure
 			result[0] = program.min(desegmentation.getVector1());
-			printoutProcessingEnd(1);
+			printoutMessage(1);
 			//form the reply 
 			segmentation = new ServerSegmentation(result, null, clientTcpUnmarshaller.getTransactionID());
 			//fill the result structure for the status
@@ -90,7 +90,7 @@ public class ServerStub extends Thread
 			result = new double[1];
 			//call the procedure
 			result[0] = program.max(desegmentation.getVector1());
-			printoutProcessingEnd(2);
+			printoutMessage(2);
 			//form the reply 
 			segmentation = new ServerSegmentation(result, null, clientTcpUnmarshaller.getTransactionID());
 			//fill the result structure for the status
@@ -105,7 +105,7 @@ public class ServerStub extends Thread
 			result = new double[desegmentation.getVector1().length];
 			//call the procedure
 			result = program.sort(desegmentation.getVector1());
-			printoutProcessingEnd(3);
+			printoutMessage(3);
 			//form the reply 
 			segmentation = new ServerSegmentation(result, null, clientTcpUnmarshaller.getTransactionID());
 			//fill the result structure for the status
@@ -126,7 +126,7 @@ public class ServerStub extends Thread
 				throw new Exception("the dimensions doesn't match");
 			//now call the procedure
 			double[][] matResult = program.multiply(mat1, mat2);
-			printoutProcessingEnd(4);
+			printoutMessage(4);
 			matRes.setMatrix(matResult);
 			//get the vector from the result matrix
 			result = matRes.getVectorFromMatrix();
@@ -224,6 +224,7 @@ public class ServerStub extends Thread
 
 	private void mapperRequestRecieved() throws IOException
 	{
+		printoutMessage(5);
 		//this will inspect the unmarshaller module to check if the stream has been unmarshaled correctly
 		if(mapperUnmarshaller.isRequestReady())
 		{
@@ -503,7 +504,7 @@ public class ServerStub extends Thread
 	
 	
 	//print out of the end of processing
-	private void printoutProcessingEnd(int procNum)
+	private void printoutMessage(int procNum)
 	{
 		switch(procNum)
 		{
@@ -522,6 +523,8 @@ public class ServerStub extends Thread
 		case 4:
 			System.out.println("- Done processing multiply() for: " + udpHandler.getClientAddress() +
 					" with Transaction ID: " + clientTcpUnmarshaller.getTransactionID());
+		case 5:
+			System.out.println("- recieved a port mapper re-register request");
 			break;
 			default:
 				break;
