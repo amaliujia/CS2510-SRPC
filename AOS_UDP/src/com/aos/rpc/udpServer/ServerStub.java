@@ -523,6 +523,7 @@ public class ServerStub extends Thread
 		case 4:
 			System.out.println("- Done processing multiply() for: " + udpHandler.getClientAddress() +
 					" with Transaction ID: " + clientTcpUnmarshaller.getTransactionID());
+			break;
 		case 5:
 			System.out.println("- recieved a port mapper re-register request");
 			break;

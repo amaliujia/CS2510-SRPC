@@ -37,7 +37,7 @@ public class ServerRunTime
 		}
 		catch(Exception e)
 		{
-			System.out.println("Error: connection with port mapper is lost, server cannot register the services");
+			System.out.println("Error: Communication with Name Server failed, services cannot be registered.");
 			mapperIsUp = false;
 		}
 		boolean flag = true;
